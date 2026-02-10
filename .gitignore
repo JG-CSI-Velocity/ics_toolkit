@@ -23,5 +23,10 @@ output/
 *.pptx
 !config.example.yaml
 
+data/*.csv
+data/*.xlsx
+data/*.xls
+!data/.gitkeep
+
 config.yaml
 .DS_Store
