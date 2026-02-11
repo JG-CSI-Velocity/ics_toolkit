@@ -1,12 +1,14 @@
-"""Tests for analyses/cohort.py -- ax27, ax28, ax29, ax31, ax32, ax34, ax36."""
+"""Tests for analyses/cohort.py and cohort_detail.py -- ax27, ax28, ax29, ax31, ax32, ax34, ax36."""
 
 from ics_toolkit.analysis.analyses.base import AnalysisResult
 from ics_toolkit.analysis.analyses.cohort import (
+    analyze_cohort_activation,
+    analyze_cohort_heatmap,
+)
+from ics_toolkit.analysis.analyses.cohort_detail import (
     analyze_activation_personas,
     analyze_activation_summary,
     analyze_branch_activation,
-    analyze_cohort_activation,
-    analyze_cohort_heatmap,
     analyze_cohort_milestones,
     analyze_growth_patterns,
 )
