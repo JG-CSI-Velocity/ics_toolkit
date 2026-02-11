@@ -161,6 +161,7 @@ def analyze(
     ics_not_in_dump: int = typer.Option(
         None, "--ics-not-in-dump", help="Count of ICS accounts not in data dump."
     ),
+    no_charts: bool = typer.Option(False, "--no-charts", help="Skip chart rendering (faster)."),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable debug logging."),
 ) -> None:
     """Run ICS analysis and generate reports.
@@ -198,12 +199,12 @@ def analyze(
 
         from ics_toolkit.analysis.pipeline import export_outputs, run_pipeline
 
-        result = run_pipeline(analysis_settings)
+        result = run_pipeline(analysis_settings, skip_charts=no_charts)
 
         successful = [a for a in result.analyses if a.error is None]
         logger.info("Analyses completed: %d/%d", len(successful), len(result.analyses))
 
-        generated = export_outputs(result)
+        generated = export_outputs(result, skip_chart_pngs=no_charts)
 
         if generated:
             logger.info("")

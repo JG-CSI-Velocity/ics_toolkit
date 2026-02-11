@@ -32,12 +32,14 @@ class AnalysisPipelineResult:
 def run_pipeline(
     settings: Settings,
     on_progress: Callable[[int, int, str], None] | None = None,
+    skip_charts: bool = False,
 ) -> AnalysisPipelineResult:
     """Execute the full analysis pipeline: load -> filter -> analyze -> chart.
 
     Args:
         settings: Application configuration.
         on_progress: Optional callback(step, total, message) for UI progress.
+        skip_charts: If True, skip Plotly chart creation entirely.
     """
     # Step 1: Load data
     logger.info("[1/5] Loading data...")
@@ -72,7 +74,9 @@ def run_pipeline(
     )
 
     # Step 3: Run analyses
-    logger.info("[3/5] Running %d analyses...", 37)
+    from ics_toolkit.analysis.analyses import ANALYSIS_REGISTRY
+
+    logger.info("[3/5] Running %d analyses...", len(ANALYSIS_REGISTRY) + 1)
     if on_progress:
         on_progress(2, 5, "Running analyses...")
     analyses = run_all_analyses(
@@ -91,15 +95,18 @@ def run_pipeline(
     logger.info("%d/%d analyses completed", len(successful), len(analyses))
 
     # Step 4: Build charts
-    logger.info("[4/5] Building charts...")
-    if on_progress:
-        on_progress(3, 5, "Building charts...")
     charts: dict[str, go.Figure] = {}
-    try:
-        charts = create_charts(analyses, settings)
-        logger.info("Built %d charts", len(charts))
-    except Exception as e:
-        logger.error("Chart generation failed: %s", e, exc_info=True)
+    if skip_charts:
+        logger.info("[4/5] Skipping charts (--no-charts)")
+    else:
+        logger.info("[4/5] Building charts...")
+        if on_progress:
+            on_progress(3, 5, "Building charts...")
+        try:
+            charts = create_charts(analyses, settings)
+            logger.info("Built %d charts", len(charts))
+        except Exception as e:
+            logger.error("Chart generation failed: %s", e, exc_info=True)
 
     return AnalysisPipelineResult(
         settings=settings,
@@ -109,7 +116,10 @@ def run_pipeline(
     )
 
 
-def export_outputs(result: AnalysisPipelineResult) -> list[Path]:
+def export_outputs(
+    result: AnalysisPipelineResult,
+    skip_chart_pngs: bool = False,
+) -> list[Path]:
     """Export pipeline results to configured output formats.
 
     Returns list of generated file paths.
@@ -125,7 +135,9 @@ def export_outputs(result: AnalysisPipelineResult) -> list[Path]:
 
     # Render chart PNGs once, reuse for both Excel and PPTX
     chart_pngs: dict[str, bytes] = {}
-    if result.charts:
+    if skip_chart_pngs:
+        logger.info("Skipping chart PNG rendering (--no-charts)")
+    elif result.charts:
         logger.info("Rendering %d charts to PNG...", len(result.charts))
         chart_pngs = render_all_chart_pngs(result.charts, settings.charts)
         logger.info("Rendered %d chart PNGs", len(chart_pngs))
