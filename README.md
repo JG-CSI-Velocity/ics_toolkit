@@ -1,6 +1,6 @@
 # ICS Toolkit
 
-Unified ICS accounts analysis pipeline. Append (organize, merge, match) raw ICS files, then run 37 analytics with Plotly charts, Excel reports, and PowerPoint decks.
+Unified ICS accounts analysis pipeline. Append (organize, merge, match) raw ICS files, then run 41 analytics with Plotly charts, Excel reports, and PowerPoint decks.
 
 ## Installation
 
@@ -55,7 +55,7 @@ That's it. No pre-processing needed. The pipeline automatically:
 5. Parses dates and coerces numerics
 6. Discovers L12M monthly columns (e.g. `Feb24 Swipes`, `Feb24 Spend`)
 7. Auto-detects cohort start from the data
-8. Runs all 37 analyses, builds charts, exports reports
+8. Runs all 41 analyses, builds charts, exports reports
 
 ## Output
 
@@ -172,7 +172,7 @@ CLI flags override config.yaml values. Config.yaml overrides defaults.
 
 ## Analyses
 
-37 analyses organized into 6 sections:
+41 analyses organized into 10 sections:
 
 **Summary** (7) -- Total ICS Accounts, Open ICS Accounts, ICS by Stat Code, Product Code Distribution, Debit Distribution, Debit x Prod Code, Debit x Branch
 
@@ -184,9 +184,15 @@ CLI flags override config.yaml values. Config.yaml overrides defaults.
 
 **Cohort** (7) -- Cohort Activation, Cohort Heatmap, Cohort Milestones, Activation Summary, Growth Patterns, Activation Personas, Branch Activation
 
-**Executive Summary** (1) -- Auto-generated summary from all prior analyses
+**Strategic Insights** (2) -- Activation Funnel, Revenue Impact
 
-20 Plotly charts are embedded in the Excel and PPTX reports.
+**Portfolio Health** (3) -- Engagement Decay, Net Portfolio Growth, Spend Concentration
+
+**Performance** (2) -- Days to First Use, Branch Performance Index
+
+**Executive Summary** (1) -- Auto-generated narrative with hero KPIs, traffic-light indicators, and What / So What / Now What bullets
+
+38 Plotly charts are embedded in the Excel and PPTX reports. The PPTX deck includes data-driven declarative slide titles (e.g. "Branch 12 leads activation at 78%") and dedicated KPI + narrative slides for the Executive Summary.
 
 ## Development
 
@@ -209,7 +215,7 @@ ruff check ics_toolkit/ tests/
 ruff format ics_toolkit/ tests/
 ```
 
-432 tests, 90% coverage.
+521 tests, 90% coverage.
 
 ## Project Structure
 
@@ -235,21 +241,29 @@ ics_toolkit/
     column_map.py          #   required columns, aliases, L12M discovery
     formatting.py          #   display + Excel number formatting
     utils.py               #   filters, enrichment helpers
-    analyses/              #   37 analysis functions
+    analyses/              #   41 analysis functions
       summary.py           #     ax01-ax07
       source.py            #     ax08-ax13
       demographics.py      #     ax14-ax21
       activity.py          #     ax22-ax26
-      cohort.py            #     ax27-ax36
-      executive_summary.py #     ax37
+      cohort.py            #     ax27-ax28 + shared helpers
+      cohort_detail.py     #     ax29-ax36
+      strategic.py         #     ax38-ax39 (funnel, revenue)
+      portfolio.py         #     ax40-ax42 (decay, growth, concentration)
+      performance.py       #     ax43-ax44 (first use, branch index)
+      executive_summary.py #     ax999 (narrative + KPIs)
+      benchmarks.py        #     interchange rate, traffic-light thresholds
       base.py              #     AnalysisResult, safe_percentage
       templates.py         #     crosstab builder, grand total
-    charts/                #   20 Plotly chart builders
+    charts/                #   38 Plotly chart builders
+      summary.py, source.py, demographics.py, activity.py
+      cohort.py, strategic.py, portfolio.py, performance.py
     exports/               #   Excel + PPTX report generators
       excel.py
-      pptx.py
-      deck_builder.py
-tests/                     # 432 tests
+      pptx.py              #     SECTION_MAP + report orchestrator
+      deck_builder.py      #     DeckBuilder + SlideContent
+      kpi_slides.py        #     KPI grid, narrative, declarative titles
+tests/                     # 521 tests
   append/
   analysis/
 ```
