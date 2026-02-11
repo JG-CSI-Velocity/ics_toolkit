@@ -223,9 +223,15 @@ def write_excel_report(
     df: pd.DataFrame,
     analyses: list,
     charts: dict | None = None,
+    chart_pngs: dict[str, bytes] | None = None,
     output_path: Path | None = None,
 ) -> Path:
     """Write the complete Excel report.
+
+    Args:
+        chart_pngs: Pre-rendered PNG bytes keyed by analysis name.
+            If provided, charts arg is ignored (avoids double-rendering).
+        charts: Plotly figure dict (legacy; rendered on the fly if chart_pngs not given).
 
     Returns the path to the generated file.
     """
@@ -240,19 +246,20 @@ def write_excel_report(
     _write_cover_sheet(wb, settings, df, analyses)
     _write_toc_sheet(wb, analyses)
 
-    # Render chart PNGs
-    chart_pngs: dict[str, bytes] = {}
-    if charts:
-        try:
-            from ics_toolkit.analysis.charts import render_chart_png
+    # Use pre-rendered PNGs if available, otherwise render from figures
+    if chart_pngs is None:
+        chart_pngs = {}
+        if charts:
+            try:
+                from ics_toolkit.analysis.charts import render_chart_png
 
-            for name, fig in charts.items():
-                try:
-                    chart_pngs[name] = render_chart_png(fig, settings.charts)
-                except Exception as e:
-                    logger.warning("Chart PNG for '%s' failed: %s", name, e)
-        except ImportError:
-            logger.warning("kaleido not available; skipping chart images in Excel")
+                for name, fig in charts.items():
+                    try:
+                        chart_pngs[name] = render_chart_png(fig, settings.charts)
+                    except Exception as e:
+                        logger.warning("Chart PNG for '%s' failed: %s", name, e)
+            except ImportError:
+                logger.warning("kaleido not available; skipping chart images in Excel")
 
     for analysis in analyses:
         if analysis.error is not None:

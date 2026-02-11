@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 from ics_toolkit.analysis.analyses import run_all_analyses
 from ics_toolkit.analysis.analyses.base import AnalysisResult
-from ics_toolkit.analysis.charts import create_charts
+from ics_toolkit.analysis.charts import create_charts, render_all_chart_pngs
 from ics_toolkit.analysis.data_loader import load_data
 from ics_toolkit.analysis.utils import get_ics_accounts, get_ics_stat_o, get_ics_stat_o_debit
 from ics_toolkit.settings import AnalysisSettings as Settings
@@ -123,16 +123,24 @@ def export_outputs(result: AnalysisPipelineResult) -> list[Path]:
 
     logger.info("[5/5] Exporting reports...")
 
+    # Render chart PNGs once, reuse for both Excel and PPTX
+    chart_pngs: dict[str, bytes] = {}
+    if result.charts:
+        logger.info("Rendering %d charts to PNG...", len(result.charts))
+        chart_pngs = render_all_chart_pngs(result.charts, settings.charts)
+        logger.info("Rendered %d chart PNGs", len(chart_pngs))
+
     if settings.outputs.excel:
         try:
             from ics_toolkit.analysis.exports.excel import write_excel_report
 
+            logger.info("Writing Excel report...")
             path = settings.output_dir / f"{client_id}_ICS_Report_{date_str}.xlsx"
             write_excel_report(
                 settings,
                 result.df,
                 result.analyses,
-                charts=result.charts,
+                chart_pngs=chart_pngs,
                 output_path=path,
             )
             generated.append(path)
@@ -143,11 +151,12 @@ def export_outputs(result: AnalysisPipelineResult) -> list[Path]:
         try:
             from ics_toolkit.analysis.exports.pptx import write_pptx_report
 
+            logger.info("Writing PowerPoint report...")
             path = settings.output_dir / f"{client_id}_ICS_Presentation_{date_str}.pptx"
             write_pptx_report(
                 settings,
                 result.analyses,
-                charts=result.charts,
+                chart_pngs=chart_pngs,
                 output_path=path,
             )
             generated.append(path)

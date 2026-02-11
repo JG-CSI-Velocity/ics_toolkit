@@ -70,11 +70,15 @@ def write_pptx_report(
     settings: Settings,
     analyses: list[AnalysisResult],
     charts: dict | None = None,
+    chart_pngs: dict[str, bytes] | None = None,
     output_path: Path | None = None,
 ) -> Path:
     """Build and save a PPTX presentation.
 
-    Uses DeckBuilder if available, otherwise creates a simple presentation.
+    Args:
+        chart_pngs: Pre-rendered PNG bytes keyed by analysis name.
+            If provided, charts arg is ignored (avoids double-rendering).
+        charts: Plotly figure dict (legacy; rendered on the fly if chart_pngs not given).
 
     Returns the path to the generated file.
     """
@@ -85,7 +89,8 @@ def write_pptx_report(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     lookup = _build_analysis_lookup(analyses)
-    chart_pngs = _render_chart_pngs(charts, settings) if charts else {}
+    if chart_pngs is None:
+        chart_pngs = _render_chart_pngs(charts, settings) if charts else {}
 
     try:
         from ics_toolkit.analysis.exports.deck_builder import (  # noqa: F401

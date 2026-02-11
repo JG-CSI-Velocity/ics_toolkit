@@ -111,3 +111,19 @@ def render_chart_png(fig: go.Figure, config: ChartConfig) -> bytes:
         height=config.height,
         scale=config.scale,
     )
+
+
+def render_all_chart_pngs(
+    charts: dict[str, go.Figure],
+    config: ChartConfig,
+) -> dict[str, bytes]:
+    """Render all charts to PNG bytes once, with progress logging."""
+    pngs: dict[str, bytes] = {}
+    total = len(charts)
+    for i, (name, fig) in enumerate(charts.items(), start=1):
+        try:
+            logger.info("  Rendering chart [%d/%d] %s", i, total, name)
+            pngs[name] = render_chart_png(fig, config)
+        except Exception as e:
+            logger.warning("  Chart PNG for '%s' failed: %s", name, e)
+    return pngs
