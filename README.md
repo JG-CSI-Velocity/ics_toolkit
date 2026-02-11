@@ -10,7 +10,15 @@ cd ics_toolkit
 pip install -e .
 ```
 
-Or with a virtual environment:
+On Windows:
+
+```powershell
+git clone https://github.com/Gilmore3088/ics_toolkit.git
+cd ics_toolkit
+pip install -e .
+```
+
+Or with a virtual environment (Mac/Linux):
 
 ```sh
 python -m venv .venv
@@ -18,7 +26,17 @@ source .venv/bin/activate
 pip install -e .
 ```
 
+Virtual environment on Windows:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e .
+```
+
 Requires Python 3.11+.
+
+`pip install -e .` installs all dependencies (plotly, kaleido, openpyxl, pydantic, pyyaml, typer, etc.). You must run this step before using the toolkit.
 
 ## Quick Start
 
@@ -235,3 +253,41 @@ tests/                     # 432 tests
   append/
   analysis/
 ```
+
+## Troubleshooting
+
+**`ModuleNotFoundError: No module named 'plotly'`** (or any missing module)
+
+You cloned the repo but didn't install dependencies. Run:
+
+```sh
+pip install -e .
+```
+
+This installs everything listed in `pyproject.toml`. If you skip this step, Python can find the `ics_toolkit` package but none of its dependencies (plotly, kaleido, pandas, etc.) will be available.
+
+**`Missing required columns: [...]`**
+
+Your data file is missing one or more required columns. Check the Required Columns table above. Column aliases are resolved automatically, but if your file uses a non-standard name, add it to `ics_toolkit/analysis/column_map.py` in `COLUMN_ALIASES`.
+
+**`Unsupported file type`**
+
+Only `.csv`, `.xlsx`, and `.xls` files are supported. Convert your file to one of these formats.
+
+**Cohort analysis returns empty results**
+
+If `cohort_start` is not set, it auto-detects from your L12M month columns or the earliest `Date Opened`. If your data has no L12M columns and no `Date Opened`, pass it explicitly:
+
+```sh
+python -m ics_toolkit analyze data/file.xlsx --cohort-start 2024-01
+```
+
+**Charts missing from reports**
+
+Chart rendering requires `kaleido==0.2.1`. Verify it's installed:
+
+```sh
+pip show kaleido
+```
+
+If the version is 1.0+, downgrade: `pip install kaleido==0.2.1`
