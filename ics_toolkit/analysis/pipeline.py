@@ -40,8 +40,9 @@ def run_pipeline(
         on_progress: Optional callback(step, total, message) for UI progress.
     """
     # Step 1: Load data
+    logger.info("[1/5] Loading data...")
     if on_progress:
-        on_progress(0, 4, "Loading data...")
+        on_progress(0, 5, "Loading data...")
     df = load_data(settings)
 
     # Auto-detect cohort_start from L12M month tags if not set
@@ -57,8 +58,9 @@ def run_pipeline(
             logger.info("Derived cohort_start from data: %s", settings.cohort_start)
 
     # Step 2: Build pre-filtered DataFrames
+    logger.info("[2/5] Filtering data...")
     if on_progress:
-        on_progress(1, 4, "Filtering data...")
+        on_progress(1, 5, "Filtering data...")
     ics_all = get_ics_accounts(df)
     ics_stat_o = get_ics_stat_o(df)
     ics_stat_o_debit = get_ics_stat_o_debit(df)
@@ -70,8 +72,9 @@ def run_pipeline(
     )
 
     # Step 3: Run analyses
+    logger.info("[3/5] Running %d analyses...", 37)
     if on_progress:
-        on_progress(2, 4, "Running analyses...")
+        on_progress(2, 5, "Running analyses...")
     analyses = run_all_analyses(
         df,
         ics_all,
@@ -88,8 +91,9 @@ def run_pipeline(
     logger.info("%d/%d analyses completed", len(successful), len(analyses))
 
     # Step 4: Build charts
+    logger.info("[4/5] Building charts...")
     if on_progress:
-        on_progress(3, 4, "Building charts...")
+        on_progress(3, 5, "Building charts...")
     charts: dict[str, go.Figure] = {}
     try:
         charts = create_charts(analyses, settings)
@@ -116,6 +120,8 @@ def export_outputs(result: AnalysisPipelineResult) -> list[Path]:
     generated: list[Path] = []
     date_str = datetime.now().strftime("%Y%m%d")
     client_id = settings.client_id or "unknown"
+
+    logger.info("[5/5] Exporting reports...")
 
     if settings.outputs.excel:
         try:

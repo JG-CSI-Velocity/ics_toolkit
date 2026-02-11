@@ -21,7 +21,9 @@ def load_data(settings: Settings) -> pd.DataFrame:
 
     Also discovers L12M columns and stores month tags on settings.
     """
+    logger.info("Loading %s ...", settings.data_file.name)
     df = _read_file(settings.data_file)
+    logger.info("Read %d rows, %d columns", len(df), len(df.columns))
     df = resolve_columns(df)
     validate_columns(df)
     df = _normalize_strings(df)
