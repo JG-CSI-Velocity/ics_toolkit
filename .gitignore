@@ -21,6 +21,7 @@ htmlcov/
 output/
 *.xlsx
 *.pptx
+!templates/*.pptx
 !config.example.yaml
 
 data/*.csv

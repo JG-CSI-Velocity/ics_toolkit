@@ -13,6 +13,7 @@ from ics_toolkit.exceptions import ConfigError
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = Path("config.yaml")
+DEFAULT_PPTX_TEMPLATE = Path(__file__).resolve().parent.parent / "templates" / "Template12.25.pptx"
 
 MATCH_MONTH_PATTERN = re.compile(r"^\d{4}\.(0[1-9]|1[0-2])$")
 
@@ -176,7 +177,7 @@ class AnalysisSettings(BaseModel):
     age_ranges: AgeRangeConfig = AgeRangeConfig()
     outputs: OutputConfig = OutputConfig()
     charts: ChartConfig = ChartConfig()
-    pptx_template: Path | None = None
+    pptx_template: Path | None = DEFAULT_PPTX_TEMPLATE
     last_12_months: list[str] = []
 
     @field_validator("data_file", mode="before")

@@ -145,7 +145,10 @@ def create_charts(
 
 
 def render_chart_png(fig: go.Figure, config: ChartConfig) -> bytes:
-    """Render a Plotly figure to PNG bytes (no temp files)."""
+    """Render a Plotly figure to PNG bytes.
+
+    Requires kaleido: ``pip install kaleido``
+    """
     return fig.to_image(
         format="png",
         width=config.width,
@@ -158,7 +161,19 @@ def render_all_chart_pngs(
     charts: dict[str, go.Figure],
     config: ChartConfig,
 ) -> dict[str, bytes]:
-    """Render all charts to PNG bytes once, with progress logging."""
+    """Render all charts to PNG bytes once, with progress logging.
+
+    Returns an empty dict if kaleido is not installed.
+    """
+    if not charts:
+        return {}
+
+    try:
+        import kaleido  # noqa: F401
+    except ImportError:
+        logger.warning("kaleido not installed; skipping chart PNG rendering")
+        return {}
+
     pngs: dict[str, bytes] = {}
     total = len(charts)
     for i, (name, fig) in enumerate(charts.items(), start=1):
