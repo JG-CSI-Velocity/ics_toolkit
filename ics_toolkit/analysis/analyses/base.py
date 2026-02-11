@@ -1,6 +1,7 @@
 """Base analysis infrastructure: AnalysisResult dataclass and helpers."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 import pandas as pd
 
@@ -14,6 +15,7 @@ class AnalysisResult:
     df: pd.DataFrame
     error: str | None = None
     sheet_name: str = ""
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.sheet_name:

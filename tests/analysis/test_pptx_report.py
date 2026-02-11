@@ -161,6 +161,7 @@ class TestSectionMap:
             "Demographics",
             "Activity Analysis",
             "Cohort Analysis",
+            "Strategic Insights",
             "Executive Summary",
         }
         assert set(SECTION_MAP.keys()) == expected

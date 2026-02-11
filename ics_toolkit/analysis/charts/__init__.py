@@ -39,6 +39,10 @@ from ics_toolkit.analysis.charts.source import (
     chart_source_by_year,
     chart_source_dist,
 )
+from ics_toolkit.analysis.charts.strategic import (
+    chart_activation_funnel,
+    chart_revenue_impact,
+)
 from ics_toolkit.analysis.charts.summary import (
     chart_debit_by_branch,
     chart_debit_by_prod,
@@ -91,6 +95,9 @@ CHART_REGISTRY: dict[str, Callable] = {
     "Growth Patterns": chart_growth_patterns,
     "Activation Personas": chart_activation_personas,
     "Branch Activation": chart_branch_activation,
+    # Strategic
+    "Activation Funnel": chart_activation_funnel,
+    "Revenue Impact": chart_revenue_impact,
 }
 
 

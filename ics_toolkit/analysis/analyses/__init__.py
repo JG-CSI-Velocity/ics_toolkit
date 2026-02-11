@@ -43,6 +43,10 @@ from ics_toolkit.analysis.analyses.source import (
     analyze_source_by_year,
     analyze_source_dist,
 )
+from ics_toolkit.analysis.analyses.strategic import (
+    analyze_activation_funnel,
+    analyze_revenue_impact,
+)
 from ics_toolkit.analysis.analyses.summary import (
     analyze_debit_by_branch,
     analyze_debit_by_prod,
@@ -98,6 +102,9 @@ ANALYSIS_REGISTRY: list[tuple[str, Callable]] = [
     ("Growth Patterns", analyze_growth_patterns),
     ("Activation Personas", analyze_activation_personas),
     ("Branch Activation", analyze_branch_activation),
+    # Strategic (ax38-ax39)
+    ("Activation Funnel", analyze_activation_funnel),
+    ("Revenue Impact", analyze_revenue_impact),
 ]
 
 # Executive summary is run separately after all other analyses.

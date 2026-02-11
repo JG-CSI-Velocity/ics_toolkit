@@ -55,6 +55,10 @@ SECTION_MAP = {
         "Activation Personas",
         "Branch Activation",
     ],
+    "Strategic Insights": [
+        "Activation Funnel",
+        "Revenue Impact",
+    ],
     "Executive Summary": [
         "Executive Summary",
     ],
