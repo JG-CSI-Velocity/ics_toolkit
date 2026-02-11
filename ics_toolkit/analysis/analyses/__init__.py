@@ -35,6 +35,11 @@ from ics_toolkit.analysis.analyses.demographics import (
     analyze_stat_open_close,
 )
 from ics_toolkit.analysis.analyses.executive_summary import analyze_executive_summary
+from ics_toolkit.analysis.analyses.portfolio import (
+    analyze_concentration,
+    analyze_engagement_decay,
+    analyze_net_portfolio_growth,
+)
 from ics_toolkit.analysis.analyses.source import (
     analyze_account_type,
     analyze_source_by_branch,
@@ -105,6 +110,10 @@ ANALYSIS_REGISTRY: list[tuple[str, Callable]] = [
     # Strategic (ax38-ax39)
     ("Activation Funnel", analyze_activation_funnel),
     ("Revenue Impact", analyze_revenue_impact),
+    # Portfolio (ax40-ax42)
+    ("Engagement Decay", analyze_engagement_decay),
+    ("Net Portfolio Growth", analyze_net_portfolio_growth),
+    ("Spend Concentration", analyze_concentration),
 ]
 
 # Executive summary is run separately after all other analyses.

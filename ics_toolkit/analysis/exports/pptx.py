@@ -55,6 +55,11 @@ SECTION_MAP = {
         "Activation Personas",
         "Branch Activation",
     ],
+    "Portfolio Health": [
+        "Engagement Decay",
+        "Net Portfolio Growth",
+        "Spend Concentration",
+    ],
     "Strategic Insights": [
         "Activation Funnel",
         "Revenue Impact",

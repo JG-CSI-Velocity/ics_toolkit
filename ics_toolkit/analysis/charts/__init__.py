@@ -31,6 +31,11 @@ from ics_toolkit.analysis.charts.demographics import (
     chart_open_vs_close,
     chart_stat_open_close,
 )
+from ics_toolkit.analysis.charts.portfolio import (
+    chart_concentration,
+    chart_engagement_decay,
+    chart_net_portfolio_growth,
+)
 from ics_toolkit.analysis.charts.source import (
     chart_account_type,
     chart_source_by_branch,
@@ -98,6 +103,10 @@ CHART_REGISTRY: dict[str, Callable] = {
     # Strategic
     "Activation Funnel": chart_activation_funnel,
     "Revenue Impact": chart_revenue_impact,
+    # Portfolio
+    "Engagement Decay": chart_engagement_decay,
+    "Net Portfolio Growth": chart_net_portfolio_growth,
+    "Spend Concentration": chart_concentration,
 }
 
 
