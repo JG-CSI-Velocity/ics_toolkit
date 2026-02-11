@@ -10,8 +10,12 @@ from ics_toolkit.settings import AnalysisSettings as Settings
 
 logger = logging.getLogger(__name__)
 
-# Maps analysis name -> section grouping for slide organization
+# Maps analysis name -> section grouping for slide organization.
+# Executive Summary first for the presentation narrative flow.
 SECTION_MAP = {
+    "Executive Summary": [
+        "Executive Summary",
+    ],
     "Summary": [
         "Total ICS Accounts",
         "Open ICS Accounts",
@@ -20,6 +24,11 @@ SECTION_MAP = {
         "Debit Distribution",
         "Debit x Prod Code",
         "Debit x Branch",
+    ],
+    "Portfolio Health": [
+        "Engagement Decay",
+        "Net Portfolio Growth",
+        "Spend Concentration",
     ],
     "Source Analysis": [
         "Source Distribution",
@@ -59,17 +68,9 @@ SECTION_MAP = {
         "Days to First Use",
         "Branch Performance Index",
     ],
-    "Portfolio Health": [
-        "Engagement Decay",
-        "Net Portfolio Growth",
-        "Spend Concentration",
-    ],
     "Strategic Insights": [
         "Activation Funnel",
         "Revenue Impact",
-    ],
-    "Executive Summary": [
-        "Executive Summary",
     ],
 }
 
@@ -163,6 +164,11 @@ def _build_with_deck_builder(
 ) -> None:
     """Build PPTX using the full DeckBuilder with CSI templates."""
     from ics_toolkit.analysis.exports.deck_builder import DeckBuilder, SlideContent
+    from ics_toolkit.analysis.exports.kpi_slides import (
+        build_executive_kpi_slide,
+        build_narrative_slide,
+        generate_declarative_title,
+    )
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         png_paths = _save_pngs_to_tempdir(chart_pngs, Path(tmp_dir))
@@ -174,7 +180,9 @@ def _build_with_deck_builder(
             SlideContent(
                 slide_type="title",
                 title="ICS Accounts Analysis",
-                kpis={"subtitle": settings.client_name or f"Client {settings.client_id}"},
+                kpis={
+                    "subtitle": settings.client_name or f"Client {settings.client_id}",
+                },
                 layout_index=1,
             )
         )
@@ -194,12 +202,23 @@ def _build_with_deck_builder(
             )
 
             for name, analysis in section_analyses:
+                # Executive Summary gets KPI + narrative slides
+                if name == "Executive Summary":
+                    kpi_slide = build_executive_kpi_slide(analysis)
+                    if kpi_slide:
+                        slides.append(kpi_slide)
+                    narrative_slide = build_narrative_slide(analysis)
+                    if narrative_slide:
+                        slides.append(narrative_slide)
+                    continue
+
                 img_path = png_paths.get(name)
                 if img_path:
+                    title = generate_declarative_title(analysis)
                     slides.append(
                         SlideContent(
                             slide_type="screenshot",
-                            title=analysis.title,
+                            title=title,
                             images=[img_path],
                             layout_index=5,
                         )
