@@ -161,6 +161,7 @@ class TestSectionMap:
             "Demographics",
             "Activity Analysis",
             "Cohort Analysis",
+            "Performance",
             "Portfolio Health",
             "Strategic Insights",
             "Executive Summary",

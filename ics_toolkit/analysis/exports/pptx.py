@@ -55,6 +55,10 @@ SECTION_MAP = {
         "Activation Personas",
         "Branch Activation",
     ],
+    "Performance": [
+        "Days to First Use",
+        "Branch Performance Index",
+    ],
     "Portfolio Health": [
         "Engagement Decay",
         "Net Portfolio Growth",

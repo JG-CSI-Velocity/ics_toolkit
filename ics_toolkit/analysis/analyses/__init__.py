@@ -35,6 +35,10 @@ from ics_toolkit.analysis.analyses.demographics import (
     analyze_stat_open_close,
 )
 from ics_toolkit.analysis.analyses.executive_summary import analyze_executive_summary
+from ics_toolkit.analysis.analyses.performance import (
+    analyze_branch_performance_index,
+    analyze_days_to_first_use,
+)
 from ics_toolkit.analysis.analyses.portfolio import (
     analyze_concentration,
     analyze_engagement_decay,
@@ -114,6 +118,9 @@ ANALYSIS_REGISTRY: list[tuple[str, Callable]] = [
     ("Engagement Decay", analyze_engagement_decay),
     ("Net Portfolio Growth", analyze_net_portfolio_growth),
     ("Spend Concentration", analyze_concentration),
+    # Performance (ax43-ax44)
+    ("Days to First Use", analyze_days_to_first_use),
+    ("Branch Performance Index", analyze_branch_performance_index),
 ]
 
 # Executive summary is run separately after all other analyses.

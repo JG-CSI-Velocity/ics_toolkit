@@ -31,6 +31,10 @@ from ics_toolkit.analysis.charts.demographics import (
     chart_open_vs_close,
     chart_stat_open_close,
 )
+from ics_toolkit.analysis.charts.performance import (
+    chart_branch_performance_index,
+    chart_days_to_first_use,
+)
 from ics_toolkit.analysis.charts.portfolio import (
     chart_concentration,
     chart_engagement_decay,
@@ -107,6 +111,9 @@ CHART_REGISTRY: dict[str, Callable] = {
     "Engagement Decay": chart_engagement_decay,
     "Net Portfolio Growth": chart_net_portfolio_growth,
     "Spend Concentration": chart_concentration,
+    # Performance
+    "Days to First Use": chart_days_to_first_use,
+    "Branch Performance Index": chart_branch_performance_index,
 }
 
 
