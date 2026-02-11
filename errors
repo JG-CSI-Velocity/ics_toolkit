@@ -1,0 +1,12 @@
+PS C:\Users\james.gilmore\OneDrive - Computer Services, Inc\Desktop\Products\ICS\ics_toolkit> python -m ics_toolkit analyze "C:\Users\james.gilmore\OneDrive - Computer Services, Inc\Desktop\ARS\ARS Analysis\Raw Data\Ready for Analysis\2026.02\1780\for ics\1780-2026-02-USF FCU-ODD-merged with ics.xlsx" -v
+INFO     ics_toolkit.cli: Client: Client 1780 (1780)
+INFO     ics_toolkit.cli: Data: C:\Users\james.gilmore\OneDrive - Computer Services, Inc\Desktop\ARS\ARS Analysis\Raw Data\Ready for Analysis\2026.02\1780\for ics\1780-2026-02-USF FCU-ODD-merged with ics.xlsx
+INFO     ics_toolkit.cli: Output: output
+ERROR    ics_toolkit.cli: Unexpected error: No module named 'plotly'
+Traceback (most recent call last):
+  File "C:\Users\james.gilmore\OneDrive - Computer Services, Inc\Desktop\Products\ICS\ics_toolkit\ics_toolkit\cli.py", line 199, in analyze
+    from ics_toolkit.analysis.pipeline import export_outputs, run_pipeline
+  File "C:\Users\james.gilmore\OneDrive - Computer Services, Inc\Desktop\Products\ICS\ics_toolkit\ics_toolkit\analysis\pipeline.py", line 10, in <module>
+    import plotly.graph_objects as go
+ModuleNotFoundError: No module named 'plotly'
+PS C:\Users\james.gilmore\OneDrive - Computer Services, Inc\Desktop\Products\ICS\ics_toolkit>
