@@ -14,9 +14,12 @@ from ics_toolkit.analysis.charts.activity import (
 )
 from ics_toolkit.analysis.charts.cohort import (
     chart_activation_personas,
+    chart_activation_summary,
     chart_branch_activation,
     chart_cohort_activation,
     chart_cohort_heatmap,
+    chart_cohort_milestones,
+    chart_growth_patterns,
 )
 from ics_toolkit.analysis.charts.demographics import (
     chart_age_comparison,
@@ -25,9 +28,15 @@ from ics_toolkit.analysis.charts.demographics import (
     chart_balance_tier_detail,
     chart_balance_tiers,
     chart_closures,
+    chart_open_vs_close,
+    chart_stat_open_close,
 )
 from ics_toolkit.analysis.charts.source import (
     chart_account_type,
+    chart_source_by_branch,
+    chart_source_by_prod,
+    chart_source_by_stat,
+    chart_source_by_year,
     chart_source_dist,
 )
 from ics_toolkit.analysis.charts.summary import (
@@ -55,11 +64,17 @@ CHART_REGISTRY: dict[str, Callable] = {
     "Debit x Branch": chart_debit_by_branch,
     # Source
     "Source Distribution": chart_source_dist,
+    "Source x Stat Code": chart_source_by_stat,
+    "Source x Prod Code": chart_source_by_prod,
+    "Source x Branch": chart_source_by_branch,
     "Account Type": chart_account_type,
+    "Source by Year": chart_source_by_year,
     # Demographics
     "Age Comparison": chart_age_comparison,
     "Closures": chart_closures,
+    "Open vs Close": chart_open_vs_close,
     "Balance Tiers": chart_balance_tiers,
+    "Stat Open Close": chart_stat_open_close,
     "Age vs Balance": chart_age_vs_balance,
     "Balance Tier Detail": chart_balance_tier_detail,
     "Age Distribution": chart_age_dist,
@@ -71,6 +86,9 @@ CHART_REGISTRY: dict[str, Callable] = {
     # Cohort
     "Cohort Activation": chart_cohort_activation,
     "Cohort Heatmap": chart_cohort_heatmap,
+    "Cohort Milestones": chart_cohort_milestones,
+    "Activation Summary": chart_activation_summary,
+    "Growth Patterns": chart_growth_patterns,
     "Activation Personas": chart_activation_personas,
     "Branch Activation": chart_branch_activation,
 }

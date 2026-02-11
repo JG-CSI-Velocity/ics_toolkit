@@ -1,5 +1,6 @@
 """Charts for demographics analyses (ax14-ax21)."""
 
+import pandas as pd
 import plotly.graph_objects as go
 
 from ics_toolkit.settings import ChartConfig
@@ -151,6 +152,81 @@ def chart_balance_tier_detail(df, config: ChartConfig) -> go.Figure:
         xaxis_title="Balance Tier",
         yaxis_title="Value",
         xaxis=dict(tickangle=-45),
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_open_vs_close(df, config: ChartConfig) -> go.Figure:
+    """ax16: Bar chart of Open vs Closed counts."""
+    colors = config.colors
+
+    open_row = df[df["Metric"] == "Open (Stat Code O)"]
+    closed_row = df[df["Metric"] == "Closed (Stat Code C)"]
+
+    labels = []
+    values = []
+    if not open_row.empty:
+        labels.append("Open")
+        values.append(open_row["Value"].iloc[0])
+    if not closed_row.empty:
+        labels.append("Closed")
+        values.append(closed_row["Value"].iloc[0])
+
+    fig = go.Figure(
+        go.Bar(
+            x=labels,
+            y=values,
+            marker_color=[colors[0], colors[4]] if len(values) == 2 else colors[: len(values)],
+            text=values,
+            textposition="outside",
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Status",
+        yaxis_title="Count",
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_stat_open_close(df, config: ChartConfig) -> go.Figure:
+    """ax18: Grouped bar of count + line of avg balance by Stat Code."""
+    data = df[~df["Stat Code"].isin(["Total", "Grand Total"])].copy()
+    colors = config.colors
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=data["Stat Code"],
+            y=data["Count"],
+            name="Count",
+            marker_color=colors[0],
+            yaxis="y",
+        )
+    )
+
+    if "Avg Curr Bal" in data.columns:
+        fig.add_trace(
+            go.Scatter(
+                x=data["Stat Code"],
+                y=pd.to_numeric(data["Avg Curr Bal"], errors="coerce"),
+                name="Avg Balance",
+                mode="lines+markers",
+                marker=dict(color=colors[3], size=8),
+                line=dict(color=colors[3], width=2),
+                yaxis="y2",
+            )
+        )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Stat Code",
+        yaxis=dict(title="Count", side="left"),
+        yaxis2=dict(title="Avg Current Balance", side="right", overlaying="y"),
         **LAYOUT_DEFAULTS,
     )
     return fig

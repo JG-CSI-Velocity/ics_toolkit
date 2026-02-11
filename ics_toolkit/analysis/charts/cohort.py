@@ -79,6 +79,108 @@ def chart_cohort_heatmap(df, config: ChartConfig) -> go.Figure:
     return fig
 
 
+def chart_cohort_milestones(df, config: ChartConfig) -> go.Figure:
+    """ax29: Grouped bar of avg swipes at M1/M3/M6/M12 by cohort."""
+    colors = config.colors
+
+    fig = go.Figure()
+    milestones = ["M1", "M3", "M6", "M12"]
+    for i, m in enumerate(milestones):
+        col = f"{m} Avg Swipes"
+        if col not in df.columns:
+            continue
+        numeric_vals = pd.to_numeric(df[col], errors="coerce")
+        fig.add_trace(
+            go.Bar(
+                x=df["Opening Month"],
+                y=numeric_vals,
+                name=m,
+                marker_color=colors[i % len(colors)],
+            )
+        )
+
+    fig.update_layout(
+        template=config.theme,
+        barmode="group",
+        xaxis_title="Opening Month",
+        yaxis_title="Avg Swipes",
+        xaxis=dict(tickangle=-45),
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_activation_summary(df, config: ChartConfig) -> go.Figure:
+    """ax31: Bar chart of aggregate activation rates (M1, M3, M6, M12)."""
+    colors = config.colors
+
+    milestones = []
+    rates = []
+    for _, row in df.iterrows():
+        metric = str(row["Metric"])
+        value = row["Value"]
+        if "Activation Rate" in metric and value != "N/A":
+            label = metric.replace(" Activation Rate", "")
+            milestones.append(label)
+            rates.append(float(value) / 100.0)
+
+    fig = go.Figure(
+        go.Bar(
+            x=milestones,
+            y=rates,
+            marker_color=colors[: len(milestones)],
+            text=[f"{r:.1%}" for r in rates],
+            textposition="outside",
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Milestone",
+        yaxis_title="Activation Rate",
+        yaxis=dict(tickformat=".0%"),
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_growth_patterns(df, config: ChartConfig) -> go.Figure:
+    """ax32: Line chart of swipe trajectories across milestones by cohort."""
+    colors = config.colors
+
+    fig = go.Figure()
+    milestones = ["M1", "M3", "M6", "M12"]
+
+    for i, (_, row) in enumerate(df.iterrows()):
+        cohort = row["Opening Month"]
+        vals = []
+        x_labels = []
+        for m in milestones:
+            col = f"{m} Swipes"
+            if col in df.columns and row[col] != "N/A":
+                vals.append(pd.to_numeric(row[col], errors="coerce"))
+                x_labels.append(m)
+
+        if vals:
+            fig.add_trace(
+                go.Scatter(
+                    x=x_labels,
+                    y=vals,
+                    name=str(cohort),
+                    mode="lines+markers",
+                    line=dict(color=colors[i % len(colors)]),
+                )
+            )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Milestone",
+        yaxis_title="Total Swipes",
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
 def chart_activation_personas(df, config: ChartConfig) -> go.Figure:
     """ax34: Pie chart of activation persona distribution."""
     colors = config.colors
