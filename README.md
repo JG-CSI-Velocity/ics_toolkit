@@ -36,14 +36,12 @@ pip install -e .
 
 Requires Python 3.11+.
 
-`pip install -e .` installs all dependencies (plotly, kaleido, openpyxl, pydantic, pyyaml, typer, etc.). You must run this step before using the toolkit.
+`pip install -e .` installs all dependencies (plotly, openpyxl, pydantic, pyyaml, typer, etc.). You must run this step before using the toolkit.
 
 ## Quick Start
 
-Place your ODD file in the `data/` directory, then run:
-
 ```sh
-python -m ics_toolkit analyze data/your-file.xlsx
+python -m ics_toolkit analyze "path/to/your-ODD-file.xlsx"
 ```
 
 That's it. No pre-processing needed. The pipeline automatically:
@@ -55,7 +53,7 @@ That's it. No pre-processing needed. The pipeline automatically:
 5. Parses dates and coerces numerics
 6. Discovers L12M monthly columns (e.g. `Feb24 Swipes`, `Feb24 Spend`)
 7. Auto-detects cohort start from the data
-8. Runs all 41 analyses, builds charts, exports reports
+8. Runs all 41 analyses, exports Excel + PPTX reports
 
 ## Output
 
@@ -63,16 +61,32 @@ Reports are written to `output/` by default:
 
 | File | Description |
 |------|-------------|
-| `{client_id}_ICS_Report_{date}.xlsx` | Excel workbook with formatted tables, embedded charts, cover sheet, and table of contents |
-| `{client_id}_ICS_Presentation_{date}.pptx` | PowerPoint deck with chart slides organized by section |
-
-Charts are rendered in-memory and embedded directly into both the Excel and PPTX files. No standalone image files are created.
+| `{client_id}_ICS_Report_{date}.xlsx` | Excel workbook with formatted tables, cover sheet, and table of contents |
+| `{client_id}_ICS_Presentation_{date}.pptx` | PowerPoint deck using the CSI widescreen template with KPI slides, narrative slides, and section dividers |
 
 Override the output directory:
 
 ```sh
-python -m ics_toolkit analyze data/your-file.xlsx --output /path/to/reports/
+python -m ics_toolkit analyze "path/to/file.xlsx" --output /path/to/reports/
 ```
+
+## PowerPoint Template
+
+The PPTX deck uses the bundled CSI widescreen template (`templates/Template12.25.pptx`, 13.33" x 7.5"). This is the same template used in the ARS pipeline.
+
+To use a different template:
+
+```yaml
+# config.yaml
+analysis:
+  pptx_template: /path/to/your/template.pptx
+```
+
+The deck includes:
+- Executive Summary with KPI grid and traffic-light indicators
+- Narrative slides (What / So What / Now What)
+- Data-driven declarative slide titles (e.g. "Branch 12 leads activation at 78%")
+- Section dividers for each analysis group
 
 ## Required Columns
 
@@ -106,6 +120,7 @@ Options:
   --client-name TEXT         Client name for report titles
   --cohort-start TEXT        Cohort start month, YYYY-MM (auto-detected)
   --ics-not-in-dump INT      ICS accounts not in data dump (default: 0)
+  --no-charts                Skip chart rendering (faster, tables only)
   --verbose, -v              Debug logging
 ```
 
@@ -154,7 +169,7 @@ for analysis in result.analyses:
     if analysis.error is None:
         print(f"{analysis.name}: {len(analysis.df)} rows")
 
-# Access a specific chart
+# Access a specific chart (interactive in Jupyter)
 fig = result.charts.get("Cohort Activation")
 if fig:
     fig.show()
@@ -174,7 +189,11 @@ CLI flags override config.yaml values. Config.yaml overrides defaults.
 
 41 analyses organized into 10 sections:
 
+**Executive Summary** (1) -- Auto-generated narrative with hero KPIs, traffic-light indicators, and What / So What / Now What bullets
+
 **Summary** (7) -- Total ICS Accounts, Open ICS Accounts, ICS by Stat Code, Product Code Distribution, Debit Distribution, Debit x Prod Code, Debit x Branch
+
+**Portfolio Health** (3) -- Engagement Decay, Net Portfolio Growth, Spend Concentration
 
 **Source** (6) -- Source Distribution, Source x Stat Code, Source x Prod Code, Source x Branch, Account Type, Source by Year
 
@@ -184,15 +203,11 @@ CLI flags override config.yaml values. Config.yaml overrides defaults.
 
 **Cohort** (7) -- Cohort Activation, Cohort Heatmap, Cohort Milestones, Activation Summary, Growth Patterns, Activation Personas, Branch Activation
 
-**Strategic Insights** (2) -- Activation Funnel, Revenue Impact
-
-**Portfolio Health** (3) -- Engagement Decay, Net Portfolio Growth, Spend Concentration
-
 **Performance** (2) -- Days to First Use, Branch Performance Index
 
-**Executive Summary** (1) -- Auto-generated narrative with hero KPIs, traffic-light indicators, and What / So What / Now What bullets
+**Strategic Insights** (2) -- Activation Funnel, Revenue Impact
 
-38 Plotly charts are embedded in the Excel and PPTX reports. The PPTX deck includes data-driven declarative slide titles (e.g. "Branch 12 leads activation at 78%") and dedicated KPI + narrative slides for the Executive Summary.
+38 Plotly charts are built for interactive use in Jupyter. Charts are embedded in reports only if `kaleido` is installed (`pip install kaleido`).
 
 ## Development
 
@@ -263,6 +278,8 @@ ics_toolkit/
       pptx.py              #     SECTION_MAP + report orchestrator
       deck_builder.py      #     DeckBuilder + SlideContent
       kpi_slides.py        #     KPI grid, narrative, declarative titles
+templates/
+  Template12.25.pptx       # CSI widescreen template (13.33" x 7.5")
 tests/                     # 521 tests
   append/
   analysis/
@@ -278,7 +295,7 @@ You cloned the repo but didn't install dependencies. Run:
 pip install -e .
 ```
 
-This installs everything listed in `pyproject.toml`. If you skip this step, Python can find the `ics_toolkit` package but none of its dependencies (plotly, kaleido, pandas, etc.) will be available.
+This installs everything listed in `pyproject.toml`. If you skip this step, Python can find the `ics_toolkit` package but none of its dependencies (plotly, pandas, etc.) will be available.
 
 **`Missing required columns: [...]`**
 
@@ -295,13 +312,3 @@ If `cohort_start` is not set, it auto-detects from your L12M month columns or th
 ```sh
 python -m ics_toolkit analyze data/file.xlsx --cohort-start 2024-01
 ```
-
-**Charts missing from reports**
-
-Chart rendering requires `kaleido==0.2.1`. Verify it's installed:
-
-```sh
-pip show kaleido
-```
-
-If the version is 1.0+, downgrade: `pip install kaleido==0.2.1`
