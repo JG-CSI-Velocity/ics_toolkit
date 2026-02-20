@@ -1,5 +1,6 @@
 """Charts for cohort analyses (ax27-ax36)."""
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -55,7 +56,12 @@ def chart_cohort_heatmap(df, config: ChartConfig) -> go.Figure:
         fig.add_annotation(text="No monthly data available", showarrow=False)
         return fig
 
-    z_data = df[month_cols].apply(pd.to_numeric, errors="coerce").fillna(0).values
+    z_data = df[month_cols].apply(pd.to_numeric, errors="coerce").values
+
+    # Text annotations: show count where data exists, blank where NaN
+    nan_mask = np.isnan(z_data)
+    int_vals = np.nan_to_num(z_data, nan=0).astype(int).astype(str)
+    text_arr = np.where(nan_mask, "", int_vals)
 
     fig = go.Figure(
         go.Heatmap(
@@ -63,7 +69,7 @@ def chart_cohort_heatmap(df, config: ChartConfig) -> go.Figure:
             x=month_cols,
             y=df["Opening Month"].tolist(),
             colorscale="Blues",
-            text=z_data.astype(int),
+            text=text_arr,
             texttemplate="%{text}",
             textfont=dict(size=10),
         )

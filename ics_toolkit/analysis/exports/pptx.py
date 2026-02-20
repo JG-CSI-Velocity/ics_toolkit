@@ -404,7 +404,7 @@ def _is_total_row(row: pd.Series) -> bool:
 def _format_cell_value(val, col_name: str) -> str:
     """Format a cell value for slide display."""
     if pd.isna(val):
-        return "-"
+        return ""
 
     col_lower = col_name.lower()
 

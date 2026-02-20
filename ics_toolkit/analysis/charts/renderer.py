@@ -214,7 +214,10 @@ def _render_heatmap(ax, trace, mpl_fig):
     if z.size == 0:
         return
 
-    im = ax.imshow(z, aspect="auto", cmap="Blues")
+    z_float = z.astype(float)
+    z_masked = np.ma.masked_invalid(z_float)
+
+    im = ax.imshow(z_masked, aspect="auto", cmap="Blues")
     mpl_fig.colorbar(im, ax=ax, shrink=0.8)
 
     if x:
@@ -224,10 +227,13 @@ def _render_heatmap(ax, trace, mpl_fig):
         ax.set_yticks(range(len(y)))
         ax.set_yticklabels([str(v) for v in y], fontsize=8)
 
-    # Add text annotations
-    for row_i in range(z.shape[0]):
-        for col_i in range(z.shape[1]):
-            val = z[row_i, col_i]
+    # Add text annotations (skip NaN cells)
+    z_max = np.nanmax(z_float) if np.any(~np.isnan(z_float)) else 1
+    for row_i in range(z_float.shape[0]):
+        for col_i in range(z_float.shape[1]):
+            val = z_float[row_i, col_i]
+            if np.isnan(val):
+                continue
             ax.text(
                 col_i,
                 row_i,
@@ -235,7 +241,7 @@ def _render_heatmap(ax, trace, mpl_fig):
                 ha="center",
                 va="center",
                 fontsize=7,
-                color="white" if val > z.max() * 0.6 else "black",
+                color="white" if val > z_max * 0.6 else "black",
             )
 
 

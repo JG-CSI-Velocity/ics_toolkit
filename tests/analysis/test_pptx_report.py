@@ -55,8 +55,8 @@ class TestBuildAnalysisLookup:
 
 
 class TestFormatCellValue:
-    def test_nan_returns_dash(self):
-        assert _format_cell_value(float("nan"), "Count") == "-"
+    def test_nan_returns_blank(self):
+        assert _format_cell_value(float("nan"), "Count") == ""
 
     def test_percentage_column(self):
         assert _format_cell_value(45.678, "Debit %") == "45.7%"
@@ -175,7 +175,9 @@ class TestWritePptxReport:
 
             def chunk(tag, data):
                 c = tag + data
-                return struct.pack(">I", len(data)) + c + struct.pack(">I", zlib.crc32(c) & 0xFFFFFFFF)
+                return (
+                    struct.pack(">I", len(data)) + c + struct.pack(">I", zlib.crc32(c) & 0xFFFFFFFF)
+                )
 
             return (
                 b"\x89PNG\r\n\x1a\n"
@@ -187,7 +189,10 @@ class TestWritePptxReport:
         pngs = {"Total ICS Accounts": _make_tiny_png()}
         path = tmp_path / "with_charts.pptx"
         write_pptx_report(
-            sample_settings, analyses, output_path=path, chart_pngs=pngs,
+            sample_settings,
+            analyses,
+            output_path=path,
+            chart_pngs=pngs,
         )
         prs = Presentation(str(path))
         # Title + section + table + chart = at least 4
