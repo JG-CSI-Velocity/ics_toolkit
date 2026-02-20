@@ -214,7 +214,7 @@ def analyze_closure_by_source(
     settings: Settings,
 ) -> AnalysisResult:
     """ax67: Closed ICS accounts broken down by Source channel."""
-    closed = ics_all[ics_all["Stat Code"] == "C"].copy()
+    closed = ics_all[ics_all["Stat Code"].isin(settings.closed_stat_codes)].copy()
 
     if closed.empty or "Source" not in closed.columns:
         return AnalysisResult(
@@ -249,7 +249,7 @@ def analyze_closure_by_branch(
     settings: Settings,
 ) -> AnalysisResult:
     """ax68: Closed ICS accounts broken down by Branch."""
-    closed = ics_all[ics_all["Stat Code"] == "C"].copy()
+    closed = ics_all[ics_all["Stat Code"].isin(settings.closed_stat_codes)].copy()
 
     if closed.empty or "Branch" not in closed.columns:
         return AnalysisResult(
@@ -284,7 +284,7 @@ def analyze_closure_by_account_age(
     settings: Settings,
 ) -> AnalysisResult:
     """ax69: Closed ICS accounts by account age at closure."""
-    closed = ics_all[ics_all["Stat Code"] == "C"].copy()
+    closed = ics_all[ics_all["Stat Code"].isin(settings.closed_stat_codes)].copy()
 
     if closed.empty or "Date Opened" not in closed.columns:
         return AnalysisResult(
@@ -364,7 +364,7 @@ def analyze_net_growth_by_source(
 
     # Closes by source
     if "Date Closed" in data.columns:
-        closed = ics_all[ics_all["Stat Code"] == "C"].copy()
+        closed = ics_all[ics_all["Stat Code"].isin(settings.closed_stat_codes)].copy()
         if cutoff is not None and "Date Closed" in closed.columns:
             closed["Close Month"] = (
                 pd.to_datetime(closed["Date Closed"], errors="coerce").dt.to_period("M").astype(str)
@@ -406,7 +406,7 @@ def analyze_closure_rate_trend(
             sheet_name="82_Closure_Rate",
         )
 
-    closed = ics_all[ics_all["Stat Code"] == "C"].copy()
+    closed = ics_all[ics_all["Stat Code"].isin(settings.closed_stat_codes)].copy()
     if closed.empty or closed["Date Closed"].isna().all():
         return AnalysisResult(
             name="Closure Rate Trend",

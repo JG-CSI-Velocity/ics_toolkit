@@ -97,8 +97,9 @@ def run_pipeline(
     if on_progress:
         on_progress(1, 5, "Filtering data...")
     ics_all = get_ics_accounts(df)
-    ics_stat_o = get_ics_stat_o(df)
-    ics_stat_o_debit = get_ics_stat_o_debit(df)
+    open_codes = settings.open_stat_codes
+    ics_stat_o = get_ics_stat_o(df, open_codes=open_codes)
+    ics_stat_o_debit = get_ics_stat_o_debit(df, open_codes=open_codes)
     logger.info(
         "Filters: %d ICS total, %d stat O, %d stat O + debit",
         len(ics_all),

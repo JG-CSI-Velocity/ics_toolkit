@@ -51,7 +51,7 @@ def analyze_closures(
     settings: Settings,
 ) -> AnalysisResult:
     """ax15: ICS accounts closed (Stat Code C) grouped by month closed."""
-    closed = ics_all[ics_all["Stat Code"] == "C"].copy()
+    closed = ics_all[ics_all["Stat Code"].isin(settings.closed_stat_codes)].copy()
 
     if "Date Closed" in closed.columns and not closed.empty:
         closed["Month Closed"] = closed["Date Closed"].dt.to_period("M").astype(str)
@@ -86,8 +86,8 @@ def analyze_open_vs_close(
 ) -> AnalysisResult:
     """ax16: ICS accounts by Open (O) vs Closed (C) status."""
     total = len(ics_all)
-    open_count = len(ics_all[ics_all["Stat Code"] == "O"])
-    closed_count = len(ics_all[ics_all["Stat Code"] == "C"])
+    open_count = len(ics_all[ics_all["Stat Code"].isin(settings.open_stat_codes)])
+    closed_count = len(ics_all[ics_all["Stat Code"].isin(settings.closed_stat_codes)])
 
     metrics = [
         ("Total ICS Accounts", total),

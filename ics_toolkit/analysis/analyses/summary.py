@@ -47,7 +47,7 @@ def analyze_open_ics(
     settings: Settings,
 ) -> AnalysisResult:
     """ax02: ICS accounts among open (Stat Code O) accounts."""
-    open_accts = df[df["Stat Code"] == "O"]
+    open_accts = df[df["Stat Code"].isin(settings.open_stat_codes)]
     total_open = len(open_accts)
     ics_open = len(ics_stat_o)
     non_ics_open = total_open - ics_open

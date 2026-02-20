@@ -24,8 +24,8 @@ def analyze_dm_overview(
 ) -> AnalysisResult:
     """ax45: DM Overview KPIs -- total, open/closed, debit, balance, L12M activity."""
     dm_all = _dm_filter(ics_all)
-    dm_open = dm_all[dm_all["Stat Code"] == "O"]
-    dm_closed = dm_all[dm_all["Stat Code"] != "O"]
+    dm_open = dm_all[dm_all["Stat Code"].isin(settings.open_stat_codes)]
+    dm_closed = dm_all[~dm_all["Stat Code"].isin(settings.open_stat_codes)]
     dm_debit = dm_open[dm_open["Debit?"] == "Yes"]
 
     total_dm = len(dm_all)

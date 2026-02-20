@@ -38,6 +38,24 @@ analysis:
   # cohort_start: "2024-01"             # null = auto-detect from data
   ics_not_in_dump: 0
 
+  # Master client config file (auto-loads stat codes, branch names, etc.)
+  # Resolution: client_config_path > ICS_CLIENT_CONFIG env var > M drive default
+  # client_config_path: "M:/ICS/Config/clients_config.json"
+
+  # Per-client overrides (keyed by client ID from filename)
+  # These override master config values. Stat codes default to O=open, C=closed.
+  clients:
+    "1759":
+      open_stat_codes: ["A"]
+      # interchange_rate: 0.0195
+      # branch_mapping:
+      #   "01": "Main Office"
+      #   "02": "North Branch"
+      # prod_code_mapping:
+      #   "100": "Regular Checking"
+      #   "200": "Savings"
+  #   "1776":                             # uses defaults or master config
+
   balance_tiers:
     bins: [-.inf, 0, 1000, 5000, 10000, 25000, 50000, 100000, .inf]
     labels:

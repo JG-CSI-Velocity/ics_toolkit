@@ -24,8 +24,8 @@ def analyze_ref_overview(
 ) -> AnalysisResult:
     """ax73: REF Overview KPIs -- total, open/closed, debit, balance, L12M activity."""
     ref_all = _ref_filter(ics_all)
-    ref_open = ref_all[ref_all["Stat Code"] == "O"]
-    ref_closed = ref_all[ref_all["Stat Code"] != "O"]
+    ref_open = ref_all[ref_all["Stat Code"].isin(settings.open_stat_codes)]
+    ref_closed = ref_all[~ref_all["Stat Code"].isin(settings.open_stat_codes)]
     ref_debit = ref_open[ref_open["Debit?"] == "Yes"]
 
     total_ref = len(ref_all)
