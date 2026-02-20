@@ -108,6 +108,16 @@ SECTION_MAP = {
         "Activation Personas",
         "Branch Activation",
     ],
+    "Persona Deep-Dive": [
+        "Persona Overview",
+        "Persona Swipe Contribution",
+        "Persona by Branch",
+        "Persona by Source",
+        "Persona Revenue Impact",
+        "Persona by Balance Tier",
+        "Persona Velocity",
+        "Persona Cohort Trend",
+    ],
     "Performance": [
         "Days to First Use",
         "Branch Performance Index",

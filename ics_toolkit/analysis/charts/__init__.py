@@ -42,6 +42,14 @@ from ics_toolkit.analysis.charts.performance import (
     chart_branch_performance_index,
     chart_days_to_first_use,
 )
+from ics_toolkit.analysis.charts.persona import (
+    chart_persona_by_branch,
+    chart_persona_by_source,
+    chart_persona_cohort_trend,
+    chart_persona_contribution,
+    chart_persona_map,
+    chart_persona_revenue,
+)
 from ics_toolkit.analysis.charts.portfolio import (
     chart_concentration,
     chart_engagement_decay,
@@ -126,6 +134,13 @@ CHART_REGISTRY: dict[str, Callable] = {
     # Performance
     "Days to First Use": chart_days_to_first_use,
     "Branch Performance Index": chart_branch_performance_index,
+    # Persona Deep-Dive
+    "Persona Overview": chart_persona_map,
+    "Persona Swipe Contribution": chart_persona_contribution,
+    "Persona by Branch": chart_persona_by_branch,
+    "Persona by Source": chart_persona_by_source,
+    "Persona Revenue Impact": chart_persona_revenue,
+    "Persona Cohort Trend": chart_persona_cohort_trend,
 }
 
 

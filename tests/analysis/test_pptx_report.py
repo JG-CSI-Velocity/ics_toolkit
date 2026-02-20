@@ -223,6 +223,7 @@ class TestSectionMap:
             "Demographics",
             "Activity Analysis",
             "Cohort Analysis",
+            "Persona Deep-Dive",
             "Performance",
             "Portfolio Health",
             "Strategic Insights",

@@ -49,6 +49,16 @@ from ics_toolkit.analysis.analyses.performance import (
     analyze_branch_performance_index,
     analyze_days_to_first_use,
 )
+from ics_toolkit.analysis.analyses.persona import (
+    analyze_persona_by_balance,
+    analyze_persona_by_branch,
+    analyze_persona_by_source,
+    analyze_persona_cohort_trend,
+    analyze_persona_contribution,
+    analyze_persona_overview,
+    analyze_persona_revenue,
+    analyze_persona_velocity,
+)
 from ics_toolkit.analysis.analyses.portfolio import (
     analyze_concentration,
     analyze_engagement_decay,
@@ -140,6 +150,15 @@ ANALYSIS_REGISTRY: list[tuple[str, Callable]] = [
     # Performance (ax43-ax44)
     ("Days to First Use", analyze_days_to_first_use),
     ("Branch Performance Index", analyze_branch_performance_index),
+    # Persona Deep-Dive (ax55-ax62)
+    ("Persona Overview", analyze_persona_overview),
+    ("Persona Swipe Contribution", analyze_persona_contribution),
+    ("Persona by Branch", analyze_persona_by_branch),
+    ("Persona by Source", analyze_persona_by_source),
+    ("Persona Revenue Impact", analyze_persona_revenue),
+    ("Persona by Balance Tier", analyze_persona_by_balance),
+    ("Persona Velocity", analyze_persona_velocity),
+    ("Persona Cohort Trend", analyze_persona_cohort_trend),
 ]
 
 # Executive summary is run separately after all other analyses.
