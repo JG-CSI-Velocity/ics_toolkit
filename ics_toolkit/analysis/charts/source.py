@@ -168,3 +168,30 @@ def chart_source_by_year(df, config: ChartConfig) -> go.Figure:
         **LAYOUT_DEFAULTS,
     )
     return fig
+
+
+def chart_source_acquisition_mix(df, config: ChartConfig) -> go.Figure:
+    """ax85: Stacked bar of monthly new account opens by source channel."""
+    colors = config.colors
+    source_cols = [c for c in df.columns if c not in ("Month", "Total")]
+
+    fig = go.Figure()
+    for i, col in enumerate(source_cols):
+        fig.add_trace(
+            go.Bar(
+                x=df["Month"],
+                y=pd.to_numeric(df[col], errors="coerce"),
+                name=str(col),
+                marker_color=colors[i % len(colors)],
+            )
+        )
+
+    fig.update_layout(
+        template=config.theme,
+        barmode="stack",
+        xaxis_title="Month",
+        yaxis_title="New Accounts",
+        xaxis=dict(tickangle=-45),
+        **LAYOUT_DEFAULTS,
+    )
+    return fig

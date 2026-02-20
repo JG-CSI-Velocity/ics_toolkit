@@ -58,11 +58,17 @@ SECTION_MAP = {
         "Debit Distribution",
         "Debit x Prod Code",
         "Debit x Branch",
+        "ICS Penetration by Branch",
     ],
     "Portfolio Health": [
         "Engagement Decay",
         "Net Portfolio Growth",
         "Spend Concentration",
+        "Closure by Source",
+        "Closure by Branch",
+        "Closure by Account Age",
+        "Net Growth by Source",
+        "Closure Rate Trend",
     ],
     "Source Analysis": [
         "Source Distribution",
@@ -71,6 +77,7 @@ SECTION_MAP = {
         "Source x Branch",
         "Account Type",
         "Source by Year",
+        "Source Acquisition Mix",
     ],
     "DM Source Deep-Dive": [
         "DM Overview",
@@ -82,6 +89,16 @@ SECTION_MAP = {
         "DM Activity by Branch",
         "DM Monthly Trends",
     ],
+    "REF Source Deep-Dive": [
+        "REF Overview",
+        "REF by Branch",
+        "REF by Debit Status",
+        "REF by Product",
+        "REF by Year Opened",
+        "REF Activity Summary",
+        "REF Activity by Branch",
+        "REF Monthly Trends",
+    ],
     "Demographics": [
         "Age Comparison",
         "Closures",
@@ -91,6 +108,7 @@ SECTION_MAP = {
         "Age vs Balance",
         "Balance Tier Detail",
         "Age Distribution",
+        "Balance Trajectory",
     ],
     "Activity Analysis": [
         "Activity Summary",
@@ -99,6 +117,8 @@ SECTION_MAP = {
         "Activity by Branch",
         "Monthly Trends",
         "Activity by Source Comparison",
+        "Monthly Interchange Trend",
+        "Business vs Personal",
     ],
     "Cohort Analysis": [
         "Cohort Activation",
@@ -122,10 +142,14 @@ SECTION_MAP = {
     "Performance": [
         "Days to First Use",
         "Branch Performance Index",
+        "Product Code Performance",
     ],
     "Strategic Insights": [
         "Activation Funnel",
         "Revenue Impact",
+        "Revenue by Branch",
+        "Revenue by Source",
+        "Dormant High-Balance",
     ],
 }
 

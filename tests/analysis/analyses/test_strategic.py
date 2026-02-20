@@ -1,10 +1,13 @@
-"""Tests for analyses/strategic.py -- Activation Funnel and Revenue Impact."""
+"""Tests for analyses/strategic.py -- Funnel, Revenue Impact, Revenue by Branch/Source."""
 
 import pandas as pd
 
 from ics_toolkit.analysis.analyses.base import AnalysisResult
 from ics_toolkit.analysis.analyses.strategic import (
     analyze_activation_funnel,
+    analyze_dormant_high_balance,
+    analyze_revenue_by_branch,
+    analyze_revenue_by_source,
     analyze_revenue_impact,
 )
 
@@ -110,4 +113,109 @@ class TestAnalyzeRevenueImpact:
     def test_empty_debit(self, sample_df, ics_all, ics_stat_o, sample_settings):
         empty = pd.DataFrame(columns=sample_df.columns)
         result = analyze_revenue_impact(sample_df, ics_all, ics_stat_o, empty, sample_settings)
+        assert isinstance(result, AnalysisResult)
+
+
+class TestAnalyzeRevenueByBranch:
+    def test_returns_analysis_result(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_revenue_by_branch(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert isinstance(result, AnalysisResult)
+        assert result.name == "Revenue by Branch"
+
+    def test_has_expected_columns(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_revenue_by_branch(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        expected = {"Branch", "Accounts", "Total L12M Spend", "Est. Interchange", "Avg Spend"}
+        assert expected.issubset(set(result.df.columns))
+
+    def test_has_total_row(self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings):
+        result = analyze_revenue_by_branch(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert "Total" in result.df["Branch"].values
+
+    def test_interchange_is_positive(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_revenue_by_branch(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        data = result.df[result.df["Branch"] != "Total"]
+        assert (data["Est. Interchange"] >= 0).all()
+
+
+class TestAnalyzeRevenueBySource:
+    def test_returns_analysis_result(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_revenue_by_source(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert isinstance(result, AnalysisResult)
+        assert result.name == "Revenue by Source"
+
+    def test_has_expected_columns(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_revenue_by_source(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        expected = {"Source", "Accounts", "Total L12M Spend", "Est. Interchange", "Avg Spend"}
+        assert expected.issubset(set(result.df.columns))
+
+    def test_has_total_row(self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings):
+        result = analyze_revenue_by_source(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert "Total" in result.df["Source"].values
+
+
+class TestAnalyzeDormantHighBalance:
+    """ax84: Dormant high-balance accounts."""
+
+    def test_returns_analysis_result(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_dormant_high_balance(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert isinstance(result, AnalysisResult)
+        assert result.name == "Dormant High-Balance"
+
+    def test_has_kpi_columns(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_dormant_high_balance(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert list(result.df.columns) == ["Metric", "Value"]
+
+    def test_contains_expected_metrics(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_dormant_high_balance(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        metrics = result.df["Metric"].tolist()
+        assert "Total Debit Accounts" in metrics
+        assert "Inactive Accounts" in metrics
+
+    def test_sheet_name(self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings):
+        result = analyze_dormant_high_balance(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert result.sheet_name == "84_Dormant_HiBal"
+
+    def test_empty_debit(self, sample_df, ics_all, ics_stat_o, sample_settings):
+        empty = pd.DataFrame(columns=sample_df.columns)
+        result = analyze_dormant_high_balance(
+            sample_df, ics_all, ics_stat_o, empty, sample_settings
+        )
         assert isinstance(result, AnalysisResult)

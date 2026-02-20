@@ -209,3 +209,39 @@ def analyze_debit_by_branch(
         df=result,
         sheet_name="07_Debit_x_Branch",
     )
+
+
+def analyze_penetration_by_branch(
+    df: pd.DataFrame,
+    ics_all: pd.DataFrame,
+    ics_stat_o: pd.DataFrame,
+    ics_stat_o_debit: pd.DataFrame,
+    settings: Settings,
+) -> AnalysisResult:
+    """ax64: ICS penetration rate by branch (ICS accounts / total accounts)."""
+    if "Branch" not in df.columns:
+        return AnalysisResult(
+            name="ICS Penetration by Branch",
+            title="ICS Penetration by Branch",
+            df=pd.DataFrame(columns=["Branch", "Total Accounts", "ICS Accounts", "Penetration %"]),
+            sheet_name="64_Penetration_Branch",
+        )
+
+    total_by_branch = df.groupby("Branch", dropna=False).size().reset_index(name="Total Accounts")
+    ics_by_branch = ics_all.groupby("Branch", dropna=False).size().reset_index(name="ICS Accounts")
+
+    result_df = total_by_branch.merge(ics_by_branch, on="Branch", how="left").fillna(0)
+    result_df["ICS Accounts"] = result_df["ICS Accounts"].astype(int)
+    result_df["Penetration %"] = result_df.apply(
+        lambda row: safe_percentage(row["ICS Accounts"], row["Total Accounts"]), axis=1
+    )
+
+    result_df = result_df.sort_values("Total Accounts", ascending=False).reset_index(drop=True)
+    result_df = append_grand_total_row(result_df, label_col="Branch")
+
+    return AnalysisResult(
+        name="ICS Penetration by Branch",
+        title="ICS Penetration Rate by Branch",
+        df=result_df,
+        sheet_name="64_Penetration_Branch",
+    )

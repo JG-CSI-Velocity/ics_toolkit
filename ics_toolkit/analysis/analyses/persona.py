@@ -5,7 +5,6 @@ from datetime import datetime
 import pandas as pd
 
 from ics_toolkit.analysis.analyses.base import AnalysisResult, safe_percentage, safe_ratio
-from ics_toolkit.analysis.analyses.benchmarks import INTERCHANGE_RATE
 from ics_toolkit.analysis.analyses.cohort import (
     MILESTONE_OFFSETS,
     _cohort_month_offset,
@@ -368,8 +367,9 @@ def analyze_persona_revenue(
             sheet_name="59_Persona_Revenue",
         )
 
+    interchange_rate = settings.interchange_rate
     total_spend = float(classified["Total L12M Spend"].sum())
-    total_interchange = total_spend * INTERCHANGE_RATE
+    total_interchange = total_spend * interchange_rate
 
     fast = classified[classified["Persona"] == "Fast Activator"]
     slow = classified[classified["Persona"] == "Slow Burner"]
@@ -378,8 +378,8 @@ def analyze_persona_revenue(
     fast_spend = float(fast["Total L12M Spend"].sum()) if len(fast) > 0 else 0
     slow_spend = float(slow["Total L12M Spend"].sum()) if len(slow) > 0 else 0
 
-    fast_interchange = fast_spend * INTERCHANGE_RATE
-    slow_interchange = slow_spend * INTERCHANGE_RATE
+    fast_interchange = fast_spend * interchange_rate
+    slow_interchange = slow_spend * interchange_rate
 
     avg_spend_fast = safe_ratio(fast_spend, len(fast))
     avg_spend_slow = safe_ratio(slow_spend, len(slow))
@@ -387,7 +387,7 @@ def analyze_persona_revenue(
     never_count = len(never)
 
     # What-if: convert 25% of never activators to slow burner spend level
-    revenue_lift = 0.25 * never_count * avg_spend_slow * INTERCHANGE_RATE
+    revenue_lift = 0.25 * never_count * avg_spend_slow * interchange_rate
 
     metrics = [
         ("Total L12M Interchange", round(total_interchange, 2)),

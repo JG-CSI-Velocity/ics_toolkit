@@ -159,3 +159,169 @@ def chart_concentration(df, config: ChartConfig) -> go.Figure:
         **LAYOUT_DEFAULTS,
     )
     return fig
+
+
+def chart_closure_by_source(df, config: ChartConfig) -> go.Figure:
+    """ax67: Bar chart of closures by source channel."""
+    data = df[df["Source"] != "Total"].copy() if "Source" in df.columns else df
+    colors = config.colors
+
+    fig = go.Figure(
+        go.Bar(
+            x=data["Source"],
+            y=data["Closed Count"],
+            marker_color=colors[4] if len(colors) > 4 else colors[-1],
+            text=data["Closed Count"],
+            textposition="outside",
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Source",
+        yaxis_title="Closed Accounts",
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_closure_by_branch(df, config: ChartConfig) -> go.Figure:
+    """ax68: Horizontal bar chart of closures by branch."""
+    data = df[df["Branch"] != "Total"].copy() if "Branch" in df.columns else df
+    colors = config.colors
+
+    data = data.sort_values("Closed Count", ascending=True)
+
+    fig = go.Figure(
+        go.Bar(
+            y=data["Branch"].astype(str),
+            x=data["Closed Count"],
+            orientation="h",
+            marker_color=colors[4] if len(colors) > 4 else colors[-1],
+            text=data["Closed Count"],
+            textposition="outside",
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Closed Accounts",
+        yaxis_title="Branch",
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_closure_by_account_age(df, config: ChartConfig) -> go.Figure:
+    """ax69: Bar chart of closures by account age bucket."""
+    colors = config.colors
+
+    fig = go.Figure(
+        go.Bar(
+            x=df["Age Range"],
+            y=df["Closed Count"],
+            marker_color=colors[3],
+            text=df["Closed Count"],
+            textposition="outside",
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Account Age at Closure",
+        yaxis_title="Closed Accounts",
+        xaxis=dict(tickangle=-45),
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_net_growth_by_source(df, config: ChartConfig) -> go.Figure:
+    """ax70: Grouped bar chart of opens/closes/net by source."""
+    data = df[df["Source"] != "Total"].copy() if "Source" in df.columns else df
+    colors = config.colors
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=data["Source"],
+            y=data["Opens"],
+            name="Opens",
+            marker_color=colors[2],
+        )
+    )
+
+    fig.add_trace(
+        go.Bar(
+            x=data["Source"],
+            y=data["Closes"],
+            name="Closes",
+            marker_color=colors[4] if len(colors) > 4 else colors[-1],
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=data["Source"],
+            y=data["Net"],
+            name="Net",
+            mode="markers+text",
+            marker=dict(color=colors[0], size=10, symbol="diamond"),
+            text=data["Net"].apply(lambda v: str(int(v))),
+            textposition="top center",
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        barmode="group",
+        xaxis_title="Source",
+        yaxis_title="Account Count",
+        **LAYOUT_DEFAULTS,
+    )
+    return fig
+
+
+def chart_closure_rate_trend(df, config: ChartConfig) -> go.Figure:
+    """ax82: Line chart of monthly closure rate."""
+    colors = config.colors
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=df["Month"],
+            y=df["Closures"],
+            name="Closures",
+            marker_color=colors[4] if len(colors) > 4 else colors[-1],
+            opacity=0.5,
+            yaxis="y",
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=df["Month"],
+            y=pd.to_numeric(df["Closure Rate %"], errors="coerce"),
+            name="Closure Rate %",
+            mode="lines+markers",
+            marker=dict(color=colors[0], size=8),
+            line=dict(color=colors[0], width=3),
+            yaxis="y2",
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        xaxis_title="Month",
+        xaxis=dict(tickangle=-45),
+        yaxis=dict(title="Closures", side="left"),
+        yaxis2=dict(
+            title="Closure Rate %",
+            side="right",
+            overlaying="y",
+        ),
+        **LAYOUT_DEFAULTS,
+    )
+    return fig

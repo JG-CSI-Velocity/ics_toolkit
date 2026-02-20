@@ -220,6 +220,7 @@ class TestSectionMap:
             "Summary",
             "Source Analysis",
             "DM Source Deep-Dive",
+            "REF Source Deep-Dive",
             "Demographics",
             "Activity Analysis",
             "Cohort Analysis",
