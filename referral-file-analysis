@@ -1,0 +1,282 @@
+<html>
+
+<body>
+<!--StartFragment--><html contenteditable="false"><head><style>
+a {
+    text-decoration: none;
+    color: #464feb;
+}
+tr th, tr td {
+    border: 1px solid #e6e6e6;
+}
+tr th {
+    background-color: #f5f5f5;
+}
+</style></head><body><div style="font-family:'Segoe UI';font-size:14px;font-style:normal;font-weight:400;line-height:20px"><p>Below is a <strong>comprehensive, `repeatable` framework</strong> you can use every month/quarter with the <em>same dataset shape</em> and get <strong>deeper insights over time</strong>, not just static reports.</p>
+<h1 id="1startwithafixedanalyticalspinenonnegotiable">1. Start with a fixed analytical spine (non‑negotiable)</h1>
+<p>Your biggest risk is “interesting but non‑repeatable insight.”<br>
+To avoid that, lock in <strong>five permanent analytical layers</strong> that never change.</p>
+<h3 id="layer1entitynormalizationthefoundation">Layer 1: Entity normalization (the foundation)</h3>
+<p>You must standardize <em>who is who</em> before you analyze anything.</p>
+<p><strong>Canonical entities</strong></p>
+<ul>
+<li>Referrer (existing account holder)</li>
+<li>New Account Holder</li>
+<li>Purchase Manager (staff)</li>
+<li>Branch</li>
+<li>Referral Code (raw + decoded)</li>
+<li>Date</li>
+</ul>
+<p><strong>Rules</strong></p>
+<ul>
+<li>One person = one ID (even if names vary)</li>
+<li>One referral = one row (no collapsing yet)</li>
+<li>Referral code stays intact; decoding is additive, not destructive</li>
+</ul>
+<p>✅ <em>This makes every future analysis comparable.</em></p>
+<h1 id="2explicitlyseparateinfluencefromprocessing">2. Explicitly separate “influence” from “processing”</h1>
+<p>This is the conceptual breakthrough most orgs miss.</p>
+<p>Create <strong>two parallel scoring systems</strong> that never get mixed.</p>
+<h2 id="ainfluencesystemdemandcreation">A. Influence system (demand creation)</h2>
+<p>This answers:</p>
+<blockquote>
+  <p>“Who actually causes people to open accounts?”</p>
+</blockquote>
+<p><strong>Metrics (repeatable)</strong></p>
+<ul>
+<li>Unique new accounts per referrer</li>
+<li>Repeat‑referral rate (same referrer over time)</li>
+<li>Referral velocity (how fast referrals cluster)</li>
+<li>Network breadth (distinct households / surnames)</li>
+<li>Cross‑branch influence (referrals processed at different branches)</li>
+</ul>
+<p><strong>Output</strong></p>
+<ul>
+<li>Referrer Influence Score (ranked)</li>
+<li>Referrer Tiering (Core / Emerging / One‑off)</li>
+</ul>
+<p>✅ This is where growth actually lives.</p>
+<h2 id="bprocessingsystemdemandcapture">B. Processing system (demand capture)</h2>
+<p>This answers:</p>
+<blockquote>
+  <p>“Who efficiently handles incoming demand?”</p>
+</blockquote>
+<p><strong>Metrics</strong></p>
+<ul>
+<li>Referrals processed per staff</li>
+<li>Time between referral and account opening</li>
+<li>Error/exception rate (non‑standard referral codes)</li>
+<li>Concentration risk (over‑dependence on few referrers)</li>
+</ul>
+<p>✅ High performance here ≠ influence.<br>
+You track it <strong>separately on purpose</strong>.</p>
+<h1 id="3formalizereferralcodedecodingmakeitmachinereadable">3. Formalize referral‑code decoding (make it machine‑readable)</h1>
+<p>Right now, referral codes are <em>implicitly</em> meaningful.<br>
+To make analysis repeatable, make that meaning <strong>explicit</strong>.</p>
+<h3 id="step1buildareferralcodedictionary">Step 1: Build a referral‑code dictionary</h3>
+<p>Create a lookup table with fields like:</p>
+
+Component | Meaning
+-- | --
+Prefix (150A, 120A, Pc, Email) | Origin channel
+Numeric block | Branch or system ID
+Alphanumeric tail | Campaign / exception / workflow
+“None” | Manual or staff‑initiated
+
+
+<p>This dictionary evolves, but <strong>the structure doesn’t</strong>.</p>
+<h3 id="step2tagdontoverwrite">Step 2: Tag, don’t overwrite</h3>
+<p>Add derived fields:</p>
+<ul>
+<li>Referral_Channel (Branch / Digital / Manual)</li>
+<li>Referral_Type (Standard / Campaign / Exception)</li>
+<li>Referral_Reliability (High / Medium / Low)</li>
+</ul>
+<p>✅ You can now analyze <em>patterns by intent</em>, not just strings.</p>
+<h1 id="4introducetimeasafirstclasssignal">4. Introduce time as a first‑class signal</h1>
+<p>Most referral analysis is static. Yours shouldn’t be.</p>
+<p>Every run should include <strong>temporal lenses</strong>:</p>
+<h3 id="aburstdetection">A. Burst detection</h3>
+<ul>
+<li>Multiple referrals from same referrer within short windows</li>
+<li>Signals community events, life events, or local momentum</li>
+</ul>
+<h3 id="bdecaycurves">B. Decay curves</h3>
+<ul>
+<li>How long referrers stay active</li>
+<li>When influence drops off</li>
+<li>Which referrers “reactivate”</li>
+</ul>
+<h3 id="claganalysis">C. Lag analysis</h3>
+<ul>
+<li>Time between referrer’s account age and first referral</li>
+<li>Time between referrals from same referrer</li>
+</ul>
+<p>✅ This turns your model from descriptive → predictive.</p>
+<h1 id="5encodenetworkeffectsthisiswhereinsightscompound">5. Encode network effects (this is where insights compound)</h1>
+<p>You already see surname repetition and clustering.<br>
+Now formalize it.</p>
+<h3 id="ahouseholdnetworkinferencewithoutguessing">A. Household / network inference (without guessing)</h3>
+<p>Use <strong>soft signals</strong>, not assumptions:</p>
+<ul>
+<li>Shared surnames</li>
+<li>Shared referrer</li>
+<li>Shared address hashes (if allowed)</li>
+<li>Close timing + same branch</li>
+</ul>
+<p>Create a field:</p>
+<ul>
+<li>Network_ID (derived, probabilistic)</li>
+</ul>
+<h3 id="bnetworklevelmetrics">B. Network‑level metrics</h3>
+<ul>
+<li>Network size</li>
+<li>Network growth rate</li>
+<li>Single‑node dependency (risk)</li>
+<li>Staff touchpoints per network</li>
+</ul>
+<p>✅ Now you’re measuring <em>communities</em>, not individuals.</p>
+<h1 id="6buildarepeatableoutputpacksameeverytime">6. Build a repeatable output pack (same every time)</h1>
+<p>Every analysis cycle should produce the <strong>same 6 artifacts</strong>:</p>
+<ol>
+<li><strong>Top Referrers (Influence‑ranked)</strong></li>
+<li><strong>Emerging Referrers (momentum‑based)</strong></li>
+<li><strong>Dormant High‑Value Referrers</strong></li>
+<li><strong>Staff as Multipliers (not volume)</strong></li>
+<li><strong>Branch‑level influence density</strong></li>
+<li><strong>Referral‑code health report</strong> (noise vs signal)</li>
+</ol>
+<p>Same structure → faster insights → leadership trust.</p>
+<h1 id="7governanceprotectinsightqualityovertime">7. Governance: protect insight quality over time</h1>
+<p>To keep this repeatable:</p>
+<h3 id="alockdefinitions">A. Lock definitions</h3>
+<ul>
+<li>Never change metric definitions mid‑stream</li>
+<li>Version them if you must</li>
+</ul>
+<h3 id="btrackwhatchangesoutsidethemodel">B. Track what changes <em>outside</em> the model</h3>
+<ul>
+<li>New campaigns</li>
+<li>Staff changes</li>
+<li>Policy changes</li>
+</ul>
+<h3 id="cdocumentknowndistortions">C. Document “known distortions”</h3>
+<p>Example:</p>
+<ul>
+<li>Campaign X inflated digital referrals</li>
+<li>Branch Y temporarily over‑indexed</li>
+</ul>
+<p>✅ This prevents false conclusions later.</p>
+<h1 id="8whatthisenablesstrategically">8. What this enables (strategically)</h1>
+<p>Once this system is in place, you can:</p>
+<ul>
+<li>Predict which members will become referrers</li>
+<li>Identify staff who <em>activate</em> influence (rare, valuable)</li>
+<li>Detect referral fraud vs organic growth</li>
+<li>Allocate incentives surgically</li>
+<li>Explain growth in causal terms (not anecdotes)</li>
+</ul>
+<h2 id="bottomline">Bottom line</h2>
+<p>You don’t need <em>more data</em>.<br>
+You need <strong>structure, separation, and repeatability</strong>.</p>
+<p>What you’re building is not a report—it’s a <strong>referral intelligence engine</strong>.</p>
+<p>If you want, next I can:</p>
+<ul>
+<li>Translate this into a <strong>step‑by‑step Excel / Power BI / SQL workflow</strong></li>
+<li>Design a <strong>Referrer Influence Score formula</strong></li>
+<li>Help you turn this into an <strong>executive‑ready monthly cadence</strong></li>
+</ul></div></body></html><!--EndFragment-->
+</body>
+</html>
+
+
+1. Canonical Python flow (repeatable pipeline)
+This is the minimal viable referral‑intelligence pipeline. Everything else layers on top.
+
+Step 1: Load + normalize (never skip)
+Pythonimport pandas as pdimport numpy as npfrom datetime import timedeltadf = pd.read_excel("1776_ics_detailed referral_v9_PTD.xls")# Standardize column namesdf.columns = (    df.columns      .str.lower()      .str.replace(" ", "_")      .str.replace("-", "_"))# Parse datesdf["issue_date"] = pd.to_datetime(df["issue_date"], errors="coerce")# Hard entity separationdf["referrer"] = df["referrer_name"].str.strip().str.upper()df["new_account"] = df["account_holder"].str.strip().str.upper()df["staff"] = df["purchase_manager"].str.strip().str.upper()df["branch"] = df["branch"].astype(str)Show more lines
+✅ Rule: Never analyze raw names. Normalize once, reuse forever.
+
+Step 2: Referral‑code decoding (lightweight, extensible)
+Pythondef decode_referral_code(code):    if pd.isna(code):        return "MANUAL"    code = str(code)    if code.startswith(("150A","120A","080A","100A","030A","020A")):        return "BRANCH_STANDARD"    if code.startswith("PC"):        return "DIGITAL_PROCESS"    if "EMAIL" in code.upper():        return "EMAIL"    return "OTHER"df["referral_channel"] = df["referral_code"].apply(decode_referral_code)Show more lines
+✅ This is intentionally simple. You’ll evolve it without breaking history.
+
+Step 3: Time‑based signals (influence needs time)
+Pythondf = df.sort_values(["referrer", "issue_date"])# Time between referrals by same referrerdf["days_since_last_referral"] = (    df.groupby("referrer")["issue_date"]      .diff()      .dt.days)# Burst flag (community / family effect)df["burst_referral"] = df["days_since_last_referral"].between(0, 14)Show more lines
+✅ Bursts = network activation, not marketing success.
+
+2. Referrer Influence Score (formal, explainable)
+This score is causal‑leaning, not vanity volume.
+
+Core philosophy
+Influence ≠ volume
+Influence = repeat behavior × network reach × momentum
+
+Metrics (per referrer)
+Pythonreferrer_metrics = df.groupby("referrer").agg(    total_referrals=("new_account", "count"),    unique_new_accounts=("new_account", "nunique"),    active_days=("issue_date", lambda x: (x.max() - x.min()).days + 1),    burst_count=("burst_referral", "sum"),    avg_days_between=("days_since_last_referral", "mean"),    channels_used=("referral_channel", "nunique")).reset_index()Show more lines
+
+Normalization helpers
+Pythondef min_max(series):    return (series - series.min()) / (series.max() - series.min() + 1e-6)Show more lines
+
+Influence Score Formula (this matters)
+Pythonreferrer_metrics["influence_score"] = (    0.35 * min_max(referrer_metrics["unique_new_accounts"]) +    0.25 * min_max(referrer_metrics["burst_count"]) +    0.20 * min_max(referrer_metrics["channels_used"]) +    0.10 * min_max(1 / (referrer_metrics["avg_days_between"] + 1)) +    0.10 * min_max(referrer_metrics["active_days"]))Show more lines
+Why this works
+
+Unique new accounts → real growth
+Bursts → social trust activation
+Channels used → influence portability
+Speed → momentum
+Longevity → sustainability
+
+✅ No single metric can dominate. That’s intentional.
+
+3. Staff “Multiplier” Score (NOT volume)
+This tells you who amplifies influence, not who processes the most.
+
+Staff metrics
+Pythonstaff_metrics = df.groupby("staff").agg(    referrals_processed=("new_account", "count"),    unique_referrers=("referrer", "nunique"),    avg_referrer_score=("referrer", lambda x:         referrer_metrics          .set_index("referrer")          .loc[x.unique(), "influence_score"]          .mean()    )).reset_index()Show more lines
+
+Multiplier Score
+Pythonstaff_metrics["multiplier_score"] = (    0.6 * min_max(staff_metrics["avg_referrer_score"]) +    0.4 * min_max(staff_metrics["unique_referrers"]))Show more lines
+✅ High multiplier ≠ busiest
+✅ High multiplier = trusted connector
+
+4. Network / household inference (safe + repeatable)
+No guessing. Only soft signals.
+Pythondf["surname"] = df["new_account"].str.split().str[-1]network_map = (    df.groupby(["referrer", "surname"])      .agg(network_size=("new_account", "nunique"))      .reset_index())df = df.merge(    network_map,    on=["referrer", "surname"],    how="left")``Show more lines
+✅ This lets you say “this referrer activates households” without assumptions.
+
+5. Monthly / quarterly cadence (automation‑ready)
+Every run produces:
+Pythontop_referrers = referrer_metrics.sort_values(    "influence_score", ascending=False).head(25)emerging_referrers = referrer_metrics[    referrer_metrics["burst_count"] > 2].sort_values("influence_score", ascending=False)top_multipliers = staff_metrics.sort_values(    "multiplier_score", ascending=False).head(15)Show more lines
+Export once, reuse forever:
+Pythontop_referrers.to_excel("top_referrers.xlsx", index=False)top_multipliers.to_excel("staff_multipliers.xlsx", index=False)Show more lines
+
+6. How to operationalize this (non‑technical)
+Monthly questions this answers automatically
+
+Who actually drives growth?
+Who is emerging before volume spikes?
+Which staff unlock influence vs just process?
+Which branches rely on fragile networks?
+Which referral channels are signal vs noise?
+
+
+7. Guardrails (this keeps it honest)
+✅ Never compare staff scores to referrer scores
+✅ Never change weights mid‑year
+✅ Version your formula (v1, v2…)
+✅ Document campaign distortions separately
+
+
+--------
+Source file fields
+
+Referrer Name
+Issue Date
+Referral Code
+Purchase Manager
+Branch
+Account Holder
+MRDB Account Hash
+Cert ID
