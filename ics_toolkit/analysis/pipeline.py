@@ -49,14 +49,36 @@ def run_pipeline(
     df = load_data(settings)
 
     # Filter out records before data_start_date (e.g. test data)
-    if settings.data_start_date and "Date Opened" in df.columns:
+    if settings.data_start_date:
         cutoff = pd.to_datetime(settings.data_start_date)
-        before = len(df)
-        opened = pd.to_datetime(df["Date Opened"], errors="coerce")
-        df = df[opened.isna() | (opened >= cutoff)].copy()
-        dropped = before - len(df)
-        if dropped > 0:
-            logger.info("Filtered %d records opened before %s", dropped, settings.data_start_date)
+
+        # Filter rows by Date Opened
+        if "Date Opened" in df.columns:
+            before = len(df)
+            opened = pd.to_datetime(df["Date Opened"], errors="coerce")
+            df = df[opened.isna() | (opened >= cutoff)].copy()
+            dropped = before - len(df)
+            if dropped > 0:
+                logger.info(
+                    "Filtered %d records opened before %s", dropped, settings.data_start_date
+                )
+
+        # Prune L12M month tags before cutoff (e.g. drop Feb24 when cutoff is 2025-01-01)
+        if settings.last_12_months:
+            filtered_tags = []
+            for tag in settings.last_12_months:
+                tag_dt = datetime.strptime(tag, "%b%y")
+                if tag_dt >= cutoff:
+                    filtered_tags.append(tag)
+            pruned = len(settings.last_12_months) - len(filtered_tags)
+            if pruned > 0:
+                logger.info(
+                    "Pruned %d L12M month tags before %s (kept %d)",
+                    pruned,
+                    settings.data_start_date,
+                    len(filtered_tags),
+                )
+            settings.last_12_months = filtered_tags
 
     # Auto-detect cohort_start from L12M month tags if not set
     if settings.cohort_start is None and settings.last_12_months:
