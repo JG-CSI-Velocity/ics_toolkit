@@ -226,6 +226,96 @@ def analyze(
         raise typer.Exit(code=1) from None
 
 
+# ---------------------------------------------------------------------------
+# Referral command
+# ---------------------------------------------------------------------------
+
+
+@app.command()
+def referral(
+    data_file: Path = typer.Argument(
+        ...,
+        help="Path to the referral data file (.xls/.xlsx/.csv).",
+    ),
+    config: Path = typer.Option(
+        DEFAULT_CONFIG_PATH, "--config", "-c", help="Path to config.yaml file."
+    ),
+    output_dir: Path = typer.Option(None, "--output", "-o", help="Output directory for reports."),
+    client_id: str = typer.Option(None, "--client-id", help="Client identifier."),
+    client_name: str = typer.Option(None, "--client-name", help="Client name for report titles."),
+    no_charts: bool = typer.Option(False, "--no-charts", help="Skip chart rendering."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable debug logging."),
+) -> None:
+    """Run referral intelligence analysis and generate reports.
+
+    Analyzes a referral tracking file to produce influence scoring,
+    staff multiplier scores, network inference, and code health reports.
+
+    This is separate from `ics-toolkit analyze`, which examines
+    account-level data from the ICS dump. The referral command examines
+    referral-level data from a separate tracking file.
+
+    Usage:
+        python -m ics_toolkit referral data/referral_file.xls
+    """
+    _setup_logging(verbose)
+    logger = logging.getLogger(__name__)
+
+    try:
+        overrides: dict = {"referral": {}}
+        overrides["referral"]["data_file"] = str(data_file)
+        if output_dir is not None:
+            overrides["referral"]["output_dir"] = str(output_dir)
+        if client_id is not None:
+            overrides["referral"]["client_id"] = client_id
+        if client_name is not None:
+            overrides["referral"]["client_name"] = client_name
+
+        from ics_toolkit.settings import Settings
+
+        settings = Settings.from_yaml(config_path=config, **overrides)
+        referral_settings = settings.referral
+
+        logger.info(
+            "Client: %s (%s)", referral_settings.client_name, referral_settings.client_id
+        )
+        logger.info("Data: %s", referral_settings.data_file)
+        logger.info("Output: %s", referral_settings.output_dir)
+
+        from ics_toolkit.referral.pipeline import export_outputs, run_pipeline
+
+        result = run_pipeline(referral_settings, skip_charts=no_charts)
+
+        successful = [a for a in result.analyses if a.error is None]
+        logger.info("Analyses completed: %d/%d", len(successful), len(result.analyses))
+
+        generated = export_outputs(result, skip_charts=no_charts)
+
+        if generated:
+            logger.info("")
+            logger.info("Generated reports:")
+            for path in generated:
+                logger.info("  %s", path)
+        else:
+            logger.warning("No reports were generated.")
+
+    except ICSToolkitError as e:
+        logger.error(str(e))
+        raise typer.Exit(code=1) from None
+    except Exception as e:
+        logger.error("Unexpected error: %s", e)
+        if verbose:
+            import traceback
+
+            traceback.print_exc()
+        raise typer.Exit(code=1) from None
+
+
+# ---------------------------------------------------------------------------
+# Chart catalog command
+# ---------------------------------------------------------------------------
+
+
 @app.command(name="chart-catalog")
 def chart_catalog(
     data_file: Path = typer.Argument(

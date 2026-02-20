@@ -93,3 +93,67 @@ analysis:
     scale: 3
 
   # pptx_template: templates/ics_template.pptx
+
+# Referral intelligence pipeline settings
+referral:
+  data_file: data/1776_ics_detailed_referral_v9_PTD.xls
+  client_id: "1776"
+  client_name: "Sample Credit Union"
+  output_dir: output/referral/
+  header_row: 0
+
+  # Influence scoring weights (must sum to 1.0)
+  scoring_weights:
+    unique_accounts: 0.35
+    burst_count: 0.25
+    channels_used: 0.20
+    velocity: 0.10
+    longevity: 0.10
+
+  # Staff multiplier weights (must sum to 1.0)
+  staff_weights:
+    avg_referrer_score: 0.60
+    unique_referrers: 0.40
+
+  # Thresholds
+  burst_window_days: 14
+  dormancy_days: 180
+  high_value_min_referrals: 5
+  emerging_min_burst_count: 2
+  emerging_lookback_days: 180
+  top_n_referrers: 25
+
+  # Entity normalization aliases (merge misspellings/variants)
+  # name_aliases:
+  #   "JOHN SMYTH": "JOHN SMITH"
+  #   "J SMITH": "JOHN SMITH"
+
+  # Branch label mapping
+  # branch_mapping:
+  #   "001": "Main Office"
+  #   "002": "North Branch"
+
+  # Referral code prefix -> channel classification
+  code_prefix_map:
+    "150A": "BRANCH_STANDARD"
+    "120A": "BRANCH_STANDARD"
+    "080A": "BRANCH_STANDARD"
+    "100A": "BRANCH_STANDARD"
+    "030A": "BRANCH_STANDARD"
+    "020A": "BRANCH_STANDARD"
+    "PC": "DIGITAL_PROCESS"
+    "EMAIL": "EMAIL"
+
+  outputs:
+    excel: true
+    powerpoint: true
+    html_charts: false
+
+  charts:
+    theme: plotly_white
+    colors: ["#1B365D", "#4A90D9", "#7BC67E", "#F5A623", "#D0021B", "#8B572A"]
+    width: 900
+    height: 500
+    scale: 3
+
+  # pptx_template: templates/referral_template.pptx
