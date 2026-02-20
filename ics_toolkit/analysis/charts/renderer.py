@@ -45,10 +45,13 @@ def plotly_to_png(fig: go.Figure) -> bytes:
 
     for i, trace in enumerate(fig.data):
         color = COLORS[i % len(COLORS)]
-        if hasattr(trace, "marker") and trace.marker and trace.marker.color:
-            color = trace.marker.color
-        if hasattr(trace, "line") and trace.line and trace.line.color:
-            color = trace.line.color
+        # Extract color safely (Pie uses .colors plural, Bar/Scatter use .color)
+        mc = getattr(getattr(trace, "marker", None), "color", None)
+        if mc is not None and isinstance(mc, str):
+            color = mc
+        lc = getattr(getattr(trace, "line", None), "color", None)
+        if lc is not None and isinstance(lc, str):
+            color = lc
 
         target_ax = ax
         if getattr(trace, "yaxis", None) == "y2" and ax2_y:
@@ -130,9 +133,10 @@ def _render_scatter(ax, trace, color, label):
     y_vals = list(trace.y) if trace.y is not None else []
 
     linestyle = "-"
-    if hasattr(trace, "line") and trace.line and trace.line.dash:
+    line_dash = getattr(getattr(trace, "line", None), "dash", None)
+    if line_dash:
         dash_map = {"dash": "--", "dot": ":", "dashdot": "-."}
-        linestyle = dash_map.get(trace.line.dash, "-")
+        linestyle = dash_map.get(line_dash, "-")
 
     marker = "o"
     mode = getattr(trace, "mode", "lines+markers") or "lines+markers"
@@ -177,8 +181,9 @@ def _render_pie(ax, trace, mpl_fig):
         hole = trace.hole
 
     colors = COLORS[: len(labels)]
-    if hasattr(trace, "marker") and trace.marker and trace.marker.colors:
-        colors = list(trace.marker.colors)
+    mc = getattr(getattr(trace, "marker", None), "colors", None)
+    if mc is not None:
+        colors = list(mc)
 
     wedges, texts, autotexts = ax.pie(
         values,
