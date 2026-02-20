@@ -31,7 +31,9 @@ COLORS = [
 
 def plotly_to_png(fig: go.Figure) -> bytes:
     """Convert a Plotly figure to PNG bytes via matplotlib."""
-    mpl_fig, ax = plt.subplots(figsize=(WIDTH, HEIGHT), dpi=DPI)
+    is_pie = any(isinstance(t, go.Pie) for t in fig.data)
+    fig_w, fig_h = (8, 8) if is_pie else (WIDTH, HEIGHT)
+    mpl_fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=DPI)
 
     title = ""
     if fig.layout.title and fig.layout.title.text:
@@ -71,7 +73,7 @@ def plotly_to_png(fig: go.Figure) -> bytes:
             _render_heatmap(ax, trace, mpl_fig)
 
     if title:
-        mpl_fig.suptitle(title, fontsize=12, fontweight="bold", y=0.98)
+        mpl_fig.suptitle(title, fontsize=16, fontweight="bold", y=0.98)
 
     _apply_axis_labels(ax, fig, ax2_y)
 
@@ -98,7 +100,7 @@ def plotly_to_png(fig: go.Figure) -> bytes:
                 loc="upper center",
                 bbox_to_anchor=(0.5, -0.08),
                 ncol=min(len(labels), 4),
-                fontsize=8,
+                fontsize=11,
             )
 
     mpl_fig.tight_layout(rect=[0, 0.03, 1, 0.95])
@@ -119,7 +121,7 @@ def _render_bar(ax, trace, color, label, fig):
         y_pos = range(len(y_vals))
         ax.barh(y_pos, x_vals, color=color, label=label, alpha=0.85)
         ax.set_yticks(list(y_pos))
-        ax.set_yticklabels([str(v) for v in y_vals], fontsize=8)
+        ax.set_yticklabels([str(v) for v in y_vals], fontsize=11)
     else:
         x_vals = list(trace.x) if trace.x is not None else []
         y_vals = list(trace.y) if trace.y is not None else []
@@ -131,7 +133,7 @@ def _render_bar(ax, trace, color, label, fig):
 
         ax.bar(x_pos, y_vals, width=bar_width, color=color, label=label, alpha=0.85)
         ax.set_xticks(x_pos)
-        ax.set_xticklabels(x_labels, rotation=45, ha="right", fontsize=8)
+        ax.set_xticklabels(x_labels, rotation=45, ha="right", fontsize=11)
 
 
 def _render_scatter(ax, trace, color, label):
@@ -201,14 +203,16 @@ def _render_pie(ax, trace, mpl_fig):
         pctdistance=0.75,
     )
 
+    ax.set_aspect("equal")
+
     if hole > 0:
         centre = plt.Circle((0, 0), hole, fc="white")
         ax.add_patch(centre)
 
     for t in texts:
-        t.set_fontsize(8)
+        t.set_fontsize(12)
     for t in autotexts:
-        t.set_fontsize(7)
+        t.set_fontsize(11)
 
 
 def _render_heatmap(ax, trace, mpl_fig):
@@ -229,10 +233,10 @@ def _render_heatmap(ax, trace, mpl_fig):
 
     if x:
         ax.set_xticks(range(len(x)))
-        ax.set_xticklabels([str(v) for v in x], rotation=45, ha="right", fontsize=8)
+        ax.set_xticklabels([str(v) for v in x], rotation=45, ha="right", fontsize=11)
     if y:
         ax.set_yticks(range(len(y)))
-        ax.set_yticklabels([str(v) for v in y], fontsize=8)
+        ax.set_yticklabels([str(v) for v in y], fontsize=11)
 
     # Add text annotations (skip NaN cells)
     z_max = np.nanmax(z_float) if np.any(~np.isnan(z_float)) else 1
@@ -247,7 +251,7 @@ def _render_heatmap(ax, trace, mpl_fig):
                 f"{int(val)}",
                 ha="center",
                 va="center",
-                fontsize=7,
+                fontsize=10,
                 color="white" if val > z_max * 0.6 else "black",
             )
 
@@ -259,23 +263,23 @@ def _apply_axis_labels(ax, fig, ax2_y):
     if layout.xaxis and layout.xaxis.title:
         title = layout.xaxis.title
         if isinstance(title, dict):
-            ax.set_xlabel(title.get("text", ""), fontsize=9)
+            ax.set_xlabel(title.get("text", ""), fontsize=13)
         elif hasattr(title, "text") and title.text:
-            ax.set_xlabel(title.text, fontsize=9)
+            ax.set_xlabel(title.text, fontsize=13)
 
     if layout.yaxis and layout.yaxis.title:
         title = layout.yaxis.title
         if isinstance(title, dict):
-            ax.set_ylabel(title.get("text", ""), fontsize=9)
+            ax.set_ylabel(title.get("text", ""), fontsize=13)
         elif hasattr(title, "text") and title.text:
-            ax.set_ylabel(title.text, fontsize=9)
+            ax.set_ylabel(title.text, fontsize=13)
 
     if ax2_y and layout.yaxis2 and layout.yaxis2.title:
         title = layout.yaxis2.title
         if isinstance(title, dict):
-            ax2_y.set_ylabel(title.get("text", ""), fontsize=9)
+            ax2_y.set_ylabel(title.get("text", ""), fontsize=13)
         elif hasattr(title, "text") and title.text:
-            ax2_y.set_ylabel(title.text, fontsize=9)
+            ax2_y.set_ylabel(title.text, fontsize=13)
 
 
 def render_all_chart_pngs(

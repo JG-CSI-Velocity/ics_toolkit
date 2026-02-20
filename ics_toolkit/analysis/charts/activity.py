@@ -187,3 +187,56 @@ def chart_monthly_trends(df, config: ChartConfig) -> go.Figure:
         **LAYOUT_DEFAULTS,
     )
     return fig
+
+
+def chart_activity_source_comparison(df, config: ChartConfig) -> go.Figure:
+    """ax63: Grouped horizontal bars comparing DM vs Referral KPIs."""
+    # Select numeric metrics for chart (skip Total Accounts row)
+    chart_metrics = [
+        "% Active",
+        "Avg Swipes / Account",
+        "Avg Spend / Account",
+        "Avg Swipes / Active",
+        "Avg Spend / Active",
+    ]
+    data = df[df["Metric"].isin(chart_metrics)].copy()
+
+    if data.empty:
+        return go.Figure()
+
+    dm_navy = "#1B365D"
+    ref_teal = "#1ABC9C"
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            y=data["Metric"],
+            x=pd.to_numeric(data["DM"], errors="coerce"),
+            name="DM",
+            orientation="h",
+            marker_color=dm_navy,
+        )
+    )
+
+    fig.add_trace(
+        go.Bar(
+            y=data["Metric"],
+            x=pd.to_numeric(data["Referral"], errors="coerce"),
+            name="Referral",
+            orientation="h",
+            marker_color=ref_teal,
+        )
+    )
+
+    fig.update_layout(
+        template=config.theme,
+        barmode="group",
+        xaxis_title="Value",
+        yaxis=dict(
+            categoryorder="array",
+            categoryarray=list(reversed(chart_metrics)),
+        ),
+        **LAYOUT_DEFAULTS,
+    )
+    return fig

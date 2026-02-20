@@ -59,7 +59,7 @@ def analyze_activity_summary(
     result_df = kpi_summary(metrics)
 
     return AnalysisResult(
-        name="L12M Activity Summary",
+        name="Activity Summary",
         title="ICS Stat O Debit - L12M Activity KPIs",
         df=result_df,
         sheet_name="22_Activity_KPIs",
@@ -299,4 +299,71 @@ def analyze_monthly_trends(
         title="ICS Stat O Debit - Monthly Activity Trends",
         df=result_df,
         sheet_name="26_Monthly_Trends",
+    )
+
+
+def _source_activity_kpis(
+    data: pd.DataFrame, tags: list[str], source_label: str
+) -> dict[str, object]:
+    """Compute L12M activity KPIs for a single source slice."""
+    data = add_l12m_activity(data.copy(), tags)
+
+    total = len(data)
+    active_mask = data["Active in L12M"] if not data.empty else pd.Series(dtype=bool)
+    active = int(active_mask.sum()) if not data.empty else 0
+
+    swipes = int(data["Total L12M Swipes"].sum()) if not data.empty else 0
+    spend = float(data["Total L12M Spend"].sum()) if not data.empty else 0.0
+
+    active_data = data[active_mask] if not data.empty else data
+
+    return {
+        "Total Accounts": total,
+        "Active Accounts": active,
+        "% Active": safe_percentage(active, total),
+        "Total Swipes": swipes,
+        "Total Spend": round(spend, 2),
+        "Avg Swipes / Account": safe_ratio(swipes, total),
+        "Avg Spend / Account": round(safe_ratio(spend, total), 2),
+        "Avg Swipes / Active": safe_ratio(swipes, active),
+        "Avg Spend / Active": round(safe_ratio(spend, active), 2),
+        "Avg Spend / Swipe": round(safe_ratio(spend, swipes), 2),
+        "Avg Balance (All)": (round(data["Curr Bal"].mean(), 2) if total > 0 else 0.0),
+        "Avg Balance (Active)": (round(active_data["Curr Bal"].mean(), 2) if active > 0 else 0.0),
+    }
+
+
+def analyze_activity_by_source_comparison(
+    df: pd.DataFrame,
+    ics_all: pd.DataFrame,
+    ics_stat_o: pd.DataFrame,
+    ics_stat_o_debit: pd.DataFrame,
+    settings: Settings,
+) -> AnalysisResult:
+    """ax63: L12M Activity KPIs side-by-side for DM vs Referral sources."""
+    tags = settings.last_12_months
+
+    dm_data = ics_stat_o_debit[ics_stat_o_debit["Source"] == "DM"]
+    ref_data = ics_stat_o_debit[ics_stat_o_debit["Source"] == "REF"]
+
+    dm_kpis = _source_activity_kpis(dm_data, tags, "DM")
+    ref_kpis = _source_activity_kpis(ref_data, tags, "REF")
+
+    rows = []
+    for metric in dm_kpis:
+        rows.append(
+            {
+                "Metric": metric,
+                "DM": dm_kpis[metric],
+                "Referral": ref_kpis[metric],
+            }
+        )
+
+    result_df = pd.DataFrame(rows)
+
+    return AnalysisResult(
+        name="Activity by Source Comparison",
+        title="L12M Activity KPIs - DM vs Referral",
+        df=result_df,
+        sheet_name="63_Activity_DM_Ref",
     )

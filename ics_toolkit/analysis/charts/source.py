@@ -109,7 +109,7 @@ def chart_source_by_branch(df, config: ChartConfig) -> go.Figure:
             colorscale="Blues",
             text=z_data.astype(int),
             texttemplate="%{text}",
-            textfont=dict(size=10),
+            textfont=dict(size=12),
         )
     )
 

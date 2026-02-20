@@ -71,7 +71,7 @@ def chart_cohort_heatmap(df, config: ChartConfig) -> go.Figure:
             colorscale="Blues",
             text=text_arr,
             texttemplate="%{text}",
-            textfont=dict(size=10),
+            textfont=dict(size=12),
         )
     )
 

@@ -98,6 +98,7 @@ SECTION_MAP = {
         "Activity by Balance",
         "Activity by Branch",
         "Monthly Trends",
+        "Activity by Source Comparison",
     ],
     "Cohort Analysis": [
         "Cohort Activation",

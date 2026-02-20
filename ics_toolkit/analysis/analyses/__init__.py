@@ -9,6 +9,7 @@ from ics_toolkit.analysis.analyses.activity import (
     analyze_activity_by_balance,
     analyze_activity_by_branch,
     analyze_activity_by_debit_source,
+    analyze_activity_by_source_comparison,
     analyze_activity_summary,
     analyze_monthly_trends,
 )
@@ -132,6 +133,7 @@ ANALYSIS_REGISTRY: list[tuple[str, Callable]] = [
     ("Activity by Balance", analyze_activity_by_balance),
     ("Activity by Branch", analyze_activity_by_branch),
     ("Monthly Trends", analyze_monthly_trends),
+    ("Activity by Source Comparison", analyze_activity_by_source_comparison),
     # Cohort (ax27-ax36)
     ("Cohort Activation", analyze_cohort_activation),
     ("Cohort Heatmap", analyze_cohort_heatmap),

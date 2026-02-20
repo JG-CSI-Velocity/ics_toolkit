@@ -45,7 +45,7 @@ def chart_persona_map(df, config: ChartConfig) -> go.Figure:
                 ),
                 text=[f"{persona}<br>{count} ({r['% of Total']:.1f}%)"],
                 textposition="top center",
-                textfont=dict(size=9),
+                textfont=dict(size=12),
             )
         )
 
@@ -123,7 +123,7 @@ def chart_persona_by_branch(df, config: ChartConfig) -> go.Figure:
                 marker_color=PERSONA_COLORS.get(persona, "#999"),
                 text=pct.apply(lambda v: f"{v:.0f}%"),
                 textposition="inside",
-                textfont=dict(size=8),
+                textfont=dict(size=11),
             )
         )
 
@@ -158,7 +158,7 @@ def chart_persona_by_source(df, config: ChartConfig) -> go.Figure:
                 marker_color=PERSONA_COLORS.get(persona, "#999"),
                 text=pct.apply(lambda v: f"{v:.0f}%"),
                 textposition="inside",
-                textfont=dict(size=8),
+                textfont=dict(size=11),
             )
         )
 

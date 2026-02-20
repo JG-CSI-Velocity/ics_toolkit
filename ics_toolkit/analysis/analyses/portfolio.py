@@ -92,9 +92,19 @@ def analyze_net_portfolio_growth(
             sheet_name="41_Net_Growth",
         )
 
-    data["Open Month"] = (
-        pd.to_datetime(data["Date Opened"], errors="coerce").dt.to_period("M").astype(str)
-    )
+    # Determine date range cutoff (use data_start_date or last 24 months)
+    if settings.data_start_date:
+        cutoff = pd.to_datetime(settings.data_start_date)
+    elif settings.last_12_months:
+        from datetime import datetime
+
+        first_tag = settings.last_12_months[0]
+        cutoff = datetime.strptime(first_tag, "%b%y")
+    else:
+        cutoff = None
+
+    opened_dt = pd.to_datetime(data["Date Opened"], errors="coerce")
+    data["Open Month"] = opened_dt.dt.to_period("M").astype(str)
 
     opens = data.groupby("Open Month").size().reset_index(name="Opens")
 
@@ -112,6 +122,12 @@ def analyze_net_portfolio_growth(
 
     result = opens.merge(closes, on="Month", how="outer").fillna(0)
     result = result.sort_values("Month").reset_index(drop=True)
+
+    # Filter to months at or after cutoff
+    if cutoff is not None:
+        cutoff_period = pd.Timestamp(cutoff).to_period("M").strftime("%Y-%m")
+        result = result[result["Month"] >= cutoff_period].reset_index(drop=True)
+
     result["Opens"] = result["Opens"].astype(int)
     result["Closes"] = result["Closes"].astype(int)
     result["Net"] = result["Opens"] - result["Closes"]

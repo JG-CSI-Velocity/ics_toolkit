@@ -11,6 +11,7 @@ from ics_toolkit.analysis.charts.activity import (
     chart_activity_by_balance,
     chart_activity_by_branch,
     chart_activity_by_source,
+    chart_activity_source_comparison,
     chart_monthly_trends,
 )
 from ics_toolkit.analysis.charts.cohort import (
@@ -116,6 +117,7 @@ CHART_REGISTRY: dict[str, Callable] = {
     "Activity by Balance": chart_activity_by_balance,
     "Activity by Branch": chart_activity_by_branch,
     "Monthly Trends": chart_monthly_trends,
+    "Activity by Source Comparison": chart_activity_source_comparison,
     # Cohort
     "Cohort Activation": chart_cohort_activation,
     "Cohort Heatmap": chart_cohort_heatmap,

@@ -4,6 +4,7 @@ from ics_toolkit.analysis.analyses.activity import (
     analyze_activity_by_balance,
     analyze_activity_by_branch,
     analyze_activity_by_debit_source,
+    analyze_activity_by_source_comparison,
     analyze_activity_summary,
     analyze_monthly_trends,
 )
@@ -197,3 +198,44 @@ class TestAnalyzeMonthlyTrends:
         )
         assert (result.df["Total Swipes"] >= 0).all()
         assert (result.df["Active Accounts"] >= 0).all()
+
+
+class TestAnalyzeActivityBySourceComparison:
+    """ax63: Activity KPIs -- DM vs Referral."""
+
+    def test_returns_analysis_result(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_activity_by_source_comparison(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert isinstance(result, AnalysisResult)
+        assert result.name == "Activity by Source Comparison"
+        assert result.error is None
+
+    def test_has_three_columns(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_activity_by_source_comparison(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert list(result.df.columns) == ["Metric", "DM", "Referral"]
+
+    def test_has_expected_metrics(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_activity_by_source_comparison(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        metrics = set(result.df["Metric"])
+        assert "Total Accounts" in metrics
+        assert "% Active" in metrics
+        assert "Total Swipes" in metrics
+
+    def test_twelve_metric_rows(
+        self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+    ):
+        result = analyze_activity_by_source_comparison(
+            sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
+        )
+        assert len(result.df) == 12
