@@ -11,6 +11,7 @@ from ics_toolkit.analysis.exports.pptx import (
     _format_cell_value,
     _is_total_row,
     _prepare_table_df,
+    write_chart_catalog,
     write_pptx_report,
 )
 
@@ -164,28 +165,6 @@ class TestWritePptxReport:
                 df=pd.DataFrame({"Branch": ["Main"], "Count": [100]}),
             ),
         ]
-        # Create a minimal valid PNG (1x1 pixel)
-        import struct
-        import zlib
-
-        def _make_tiny_png() -> bytes:
-            raw = b"\x00\xff\x00\x00"
-            compressed = zlib.compress(raw)
-            ihdr = struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
-
-            def chunk(tag, data):
-                c = tag + data
-                return (
-                    struct.pack(">I", len(data)) + c + struct.pack(">I", zlib.crc32(c) & 0xFFFFFFFF)
-                )
-
-            return (
-                b"\x89PNG\r\n\x1a\n"
-                + chunk(b"IHDR", ihdr)
-                + chunk(b"IDAT", compressed)
-                + chunk(b"IEND", b"")
-            )
-
         pngs = {"Total ICS Accounts": _make_tiny_png()}
         path = tmp_path / "with_charts.pptx"
         write_pptx_report(
@@ -241,3 +220,70 @@ class TestSectionMap:
         activity = SECTION_MAP["Activity Analysis"]
         assert "Activity Summary" in activity
         assert "L12M Activity Summary" not in activity
+
+
+def _make_tiny_png() -> bytes:
+    """Create a minimal valid 1x1 PNG for testing."""
+    import struct
+    import zlib
+
+    raw = b"\x00\xff\x00\x00"
+    compressed = zlib.compress(raw)
+    ihdr = struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+
+    def chunk(tag, data):
+        c = tag + data
+        return struct.pack(">I", len(data)) + c + struct.pack(">I", zlib.crc32(c) & 0xFFFFFFFF)
+
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", ihdr)
+        + chunk(b"IDAT", compressed)
+        + chunk(b"IEND", b"")
+    )
+
+
+class TestWriteChartCatalog:
+    def test_creates_file(self, sample_settings, mock_analyses, tmp_path):
+        pngs = {"Total ICS Accounts": _make_tiny_png()}
+        path = tmp_path / "catalog.pptx"
+        result = write_chart_catalog(sample_settings, mock_analyses, pngs, output_path=path)
+        assert result.exists()
+
+    def test_auto_generates_path(self, sample_settings, mock_analyses):
+        sample_settings.output_dir.mkdir(parents=True, exist_ok=True)
+        pngs = {"Total ICS Accounts": _make_tiny_png()}
+        result = write_chart_catalog(sample_settings, mock_analyses, pngs)
+        assert result.exists()
+        assert "Chart_Catalog" in result.name
+
+    def test_one_slide_per_chart(self, sample_settings, mock_analyses, tmp_path):
+        pngs = {
+            "Total ICS Accounts": _make_tiny_png(),
+            "ICS by Stat Code": _make_tiny_png(),
+            "Source Distribution": _make_tiny_png(),
+        }
+        path = tmp_path / "catalog.pptx"
+        write_chart_catalog(sample_settings, mock_analyses, pngs, output_path=path)
+        prs = Presentation(str(path))
+        # 1 title slide + 3 chart slides = 4
+        assert len(prs.slides) == 4
+
+    def test_empty_pngs_title_only(self, sample_settings, mock_analyses, tmp_path):
+        path = tmp_path / "empty_catalog.pptx"
+        write_chart_catalog(sample_settings, mock_analyses, {}, output_path=path)
+        prs = Presentation(str(path))
+        assert len(prs.slides) == 1  # title only
+
+    def test_slide_has_metadata_text(self, sample_settings, mock_analyses, tmp_path):
+        pngs = {"Total ICS Accounts": _make_tiny_png()}
+        path = tmp_path / "meta.pptx"
+        write_chart_catalog(sample_settings, mock_analyses, pngs, output_path=path)
+        prs = Presentation(str(path))
+        # Chart slide is slide index 1 (after title)
+        chart_slide = prs.slides[1]
+        texts = [shape.text_frame.text for shape in chart_slide.shapes if shape.has_text_frame]
+        combined = " ".join(texts)
+        assert "Section:" in combined
+        assert "Function:" in combined
+        assert "Source:" in combined

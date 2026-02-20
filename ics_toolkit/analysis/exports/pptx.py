@@ -172,6 +172,112 @@ def _build_analysis_lookup(analyses: list[AnalysisResult]) -> dict[str, Analysis
 # =========================================================================
 
 
+def write_chart_catalog(
+    settings: Settings,
+    analyses: list[AnalysisResult],
+    chart_pngs: dict[str, bytes],
+    output_path: Path | None = None,
+) -> Path:
+    """Build a chart catalog PPTX: one slide per chart with metadata labels.
+
+    Each slide shows the chart index, name, rendered image, section,
+    chart builder function name, and source .py file path.
+    """
+    import inspect
+
+    from ics_toolkit.analysis.charts import CHART_REGISTRY
+
+    if output_path is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = settings.output_dir / f"Chart_Catalog_{timestamp}.pptx"
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Build chart name -> metadata mapping via introspection
+    pkg_root = Path(__file__).resolve().parent.parent.parent
+    chart_meta: dict[str, dict[str, str]] = {}
+    for name, func in CHART_REGISTRY.items():
+        try:
+            src = Path(inspect.getfile(func)).resolve()
+            rel = src.relative_to(pkg_root)
+            source_str = f"ics_toolkit/{rel}"
+        except (ValueError, TypeError):
+            source_str = "unknown"
+        chart_meta[name] = {"function": func.__name__, "source": source_str}
+
+    # Build name -> section lookup
+    section_lookup: dict[str, str] = {}
+    for section_name, names in SECTION_MAP.items():
+        for n in names:
+            section_lookup[n] = section_name
+
+    # Blank widescreen presentation (no template needed for catalog)
+    prs = Presentation()
+    prs.slide_width = SLIDE_WIDTH
+    prs.slide_height = SLIDE_HEIGHT
+
+    # Title slide
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _add_slide_title(slide, "ICS Chart Catalog")
+    subtitle = (
+        f"{settings.client_name or 'Client ' + (settings.client_id or 'unknown')}"
+        f"  --  {len(chart_pngs)} charts"
+    )
+    txbox = slide.shapes.add_textbox(TITLE_LEFT, Inches(1.2), TITLE_WIDTH, Inches(1.0))
+    tf = txbox.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = subtitle
+    p.font.size = Pt(18)
+    p.font.color.rgb = DARK_TEXT
+
+    # One slide per chart
+    for idx, (name, png_bytes) in enumerate(chart_pngs.items(), start=1):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+        # Title: "#idx  name"
+        _add_slide_title(slide, f"#{idx}  {name}")
+
+        # Chart image (reduced height to leave room for metadata)
+        slide.shapes.add_picture(
+            BytesIO(png_bytes),
+            CHART_LEFT,
+            CHART_TOP,
+            width=CHART_WIDTH,
+            height=Inches(4.5),
+        )
+
+        # Metadata text box
+        meta = chart_meta.get(name, {})
+        section = section_lookup.get(name, "Unmapped")
+        func_name = meta.get("function", "N/A")
+        source = meta.get("source", "N/A")
+
+        meta_lines = [
+            f"Section: {section}",
+            f"Function: {func_name}()",
+            f"Source: {source}",
+        ]
+
+        txbox = slide.shapes.add_textbox(
+            Inches(0.5),
+            Inches(5.8),
+            Inches(12.3),
+            Inches(1.2),
+        )
+        tf = txbox.text_frame
+        tf.word_wrap = True
+        for i, line in enumerate(meta_lines):
+            p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+            p.text = line
+            p.font.size = Pt(11)
+            p.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+
+    prs.save(str(output_path))
+    logger.info("Chart catalog saved: %s (%d slides)", output_path, len(prs.slides))
+    return output_path
+
+
 def write_pptx_report(
     settings: Settings,
     analyses: list[AnalysisResult],
