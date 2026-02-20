@@ -59,7 +59,7 @@ def plotly_to_png(fig: go.Figure) -> bytes:
         if getattr(trace, "xaxis", None) == "x2" and ax2_x:
             target_ax = ax2_x
 
-        label = trace.name or f"trace_{i}"
+        label = trace.name or "_nolegend_"
 
         if isinstance(trace, go.Bar):
             _render_bar(target_ax, trace, color, label, fig)
@@ -79,20 +79,27 @@ def plotly_to_png(fig: go.Figure) -> bytes:
     if ax2_y:
         ax2_y.grid(False)
 
-    handles, labels = ax.get_legend_handles_labels()
-    if ax2_y:
-        h2, l2 = ax2_y.get_legend_handles_labels()
-        handles += h2
-        labels += l2
-    if labels:
-        ax.legend(
-            handles,
-            labels,
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.08),
-            ncol=min(len(labels), 4),
-            fontsize=8,
-        )
+    show_legend = fig.layout.showlegend
+    if show_legend is None:
+        # Default: show legend only when multiple traces (excluding Pie/Heatmap)
+        non_pie = [t for t in fig.data if not isinstance(t, (go.Pie, go.Heatmap))]
+        show_legend = len(non_pie) > 1
+
+    if show_legend:
+        handles, labels = ax.get_legend_handles_labels()
+        if ax2_y:
+            h2, l2 = ax2_y.get_legend_handles_labels()
+            handles += h2
+            labels += l2
+        if labels:
+            ax.legend(
+                handles,
+                labels,
+                loc="upper center",
+                bbox_to_anchor=(0.5, -0.08),
+                ncol=min(len(labels), 4),
+                fontsize=8,
+            )
 
     mpl_fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
