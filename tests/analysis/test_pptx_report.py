@@ -158,6 +158,7 @@ class TestSectionMap:
         expected = {
             "Summary",
             "Source Analysis",
+            "DM Source Deep-Dive",
             "Demographics",
             "Activity Analysis",
             "Cohort Analysis",

@@ -34,6 +34,16 @@ from ics_toolkit.analysis.analyses.demographics import (
     analyze_open_vs_close,
     analyze_stat_open_close,
 )
+from ics_toolkit.analysis.analyses.dm_source import (
+    analyze_dm_activity,
+    analyze_dm_activity_by_branch,
+    analyze_dm_by_branch,
+    analyze_dm_by_debit,
+    analyze_dm_by_product,
+    analyze_dm_by_year,
+    analyze_dm_monthly_trends,
+    analyze_dm_overview,
+)
 from ics_toolkit.analysis.analyses.executive_summary import analyze_executive_summary
 from ics_toolkit.analysis.analyses.performance import (
     analyze_branch_performance_index,
@@ -88,6 +98,15 @@ ANALYSIS_REGISTRY: list[tuple[str, Callable]] = [
     ("Source x Branch", analyze_source_by_branch),
     ("Account Type", analyze_account_type),
     ("Source by Year", analyze_source_by_year),
+    # DM Source Deep-Dive (ax45-ax52)
+    ("DM Overview", analyze_dm_overview),
+    ("DM by Branch", analyze_dm_by_branch),
+    ("DM by Debit Status", analyze_dm_by_debit),
+    ("DM by Product", analyze_dm_by_product),
+    ("DM by Year Opened", analyze_dm_by_year),
+    ("DM Activity Summary", analyze_dm_activity),
+    ("DM Activity by Branch", analyze_dm_activity_by_branch),
+    ("DM Monthly Trends", analyze_dm_monthly_trends),
     # Demographics (ax14-ax21)
     ("Age Comparison", analyze_age_comparison),
     ("Closures", analyze_closures),

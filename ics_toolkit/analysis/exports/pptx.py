@@ -38,6 +38,16 @@ SECTION_MAP = {
         "Account Type",
         "Source by Year",
     ],
+    "DM Source Deep-Dive": [
+        "DM Overview",
+        "DM by Branch",
+        "DM by Debit Status",
+        "DM by Product",
+        "DM by Year Opened",
+        "DM Activity Summary",
+        "DM Activity by Branch",
+        "DM Monthly Trends",
+    ],
     "Demographics": [
         "Age Comparison",
         "Closures",

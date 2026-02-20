@@ -31,6 +31,12 @@ from ics_toolkit.analysis.charts.demographics import (
     chart_open_vs_close,
     chart_stat_open_close,
 )
+from ics_toolkit.analysis.charts.dm_source import (
+    chart_dm_activity_by_branch,
+    chart_dm_by_branch,
+    chart_dm_by_year,
+    chart_dm_monthly_trends,
+)
 from ics_toolkit.analysis.charts.performance import (
     chart_branch_performance_index,
     chart_days_to_first_use,
@@ -82,6 +88,11 @@ CHART_REGISTRY: dict[str, Callable] = {
     "Source x Branch": chart_source_by_branch,
     "Account Type": chart_account_type,
     "Source by Year": chart_source_by_year,
+    # DM Source Deep-Dive
+    "DM by Branch": chart_dm_by_branch,
+    "DM by Year Opened": chart_dm_by_year,
+    "DM Activity by Branch": chart_dm_activity_by_branch,
+    "DM Monthly Trends": chart_dm_monthly_trends,
     # Demographics
     "Age Comparison": chart_age_comparison,
     "Closures": chart_closures,
