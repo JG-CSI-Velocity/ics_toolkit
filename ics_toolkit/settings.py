@@ -171,6 +171,7 @@ class AnalysisSettings(BaseModel):
     client_id: str | None = None
     client_name: str | None = None
     output_dir: Path = Path("output/")
+    data_start_date: str | None = None
     cohort_start: str | None = None
     ics_not_in_dump: int = 0
     balance_tiers: BalanceTierConfig = BalanceTierConfig()

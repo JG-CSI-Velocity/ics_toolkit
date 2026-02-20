@@ -24,7 +24,7 @@ ZEBRA_GRAY = RGBColor(0xF2, 0xF2, 0xF2)
 TOTAL_BG = RGBColor(0xE0, 0xE0, 0xE0)
 
 # -- Table constraints -----------------------------------------------------
-MAX_TABLE_ROWS = 20
+MAX_TABLE_ROWS = 12
 MAX_TABLE_COLS = 10
 
 # -- Slide positioning (widescreen 13.33" x 7.5") -------------------------
@@ -40,9 +40,10 @@ TABLE_LEFT = Inches(0.5)
 TABLE_TOP = Inches(1.1)
 TABLE_WIDTH = Inches(12.3)
 
-CHART_LEFT = Inches(1.0)
+CHART_LEFT = Inches(1.5)
 CHART_TOP = Inches(1.1)
-CHART_WIDTH = Inches(11.0)
+CHART_WIDTH = Inches(10.0)
+CHART_MAX_HEIGHT = Inches(5.5)
 
 # Maps analysis name -> section grouping for slide organization.
 SECTION_MAP = {
@@ -271,8 +272,8 @@ def _add_table_slide(prs: Presentation, analysis: AnalysisResult) -> None:
     nrows = len(show_df) + 1  # +1 for header
     ncols = len(cols)
 
-    # Calculate table height: ~0.28" per row
-    row_height = 0.28
+    # Calculate table height: ~0.45" per row (Pt 20 font)
+    row_height = 0.45
     table_height = Inches(nrows * row_height)
 
     tbl_shape = slide.shapes.add_table(
@@ -330,6 +331,7 @@ def _add_chart_slide(prs: Presentation, title: str, png_bytes: bytes) -> None:
         CHART_LEFT,
         CHART_TOP,
         width=CHART_WIDTH,
+        height=CHART_MAX_HEIGHT,
     )
 
 
@@ -350,7 +352,7 @@ def _add_slide_title(slide, text: str) -> None:
     tf.word_wrap = True
     p = tf.paragraphs[0]
     p.text = text
-    p.font.size = Pt(18)
+    p.font.size = Pt(24)
     p.font.bold = True
     p.font.color.rgb = NAVY
 
@@ -439,7 +441,7 @@ def _style_header_cell(cell) -> None:
     cell.fill.fore_color.rgb = NAVY
 
     for paragraph in cell.text_frame.paragraphs:
-        paragraph.font.size = Pt(9)
+        paragraph.font.size = Pt(20)
         paragraph.font.bold = True
         paragraph.font.color.rgb = WHITE
         paragraph.alignment = PP_ALIGN.CENTER
@@ -461,7 +463,7 @@ def _style_data_cell(
         cell.fill.background()
 
     for paragraph in cell.text_frame.paragraphs:
-        paragraph.font.size = Pt(8)
+        paragraph.font.size = Pt(20)
         paragraph.font.color.rgb = DARK_TEXT
         paragraph.alignment = PP_ALIGN.CENTER
         if is_total:

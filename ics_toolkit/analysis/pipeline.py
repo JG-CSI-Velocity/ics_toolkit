@@ -48,6 +48,16 @@ def run_pipeline(
         on_progress(0, 5, "Loading data...")
     df = load_data(settings)
 
+    # Filter out records before data_start_date (e.g. test data)
+    if settings.data_start_date and "Date Opened" in df.columns:
+        cutoff = pd.to_datetime(settings.data_start_date)
+        before = len(df)
+        opened = pd.to_datetime(df["Date Opened"], errors="coerce")
+        df = df[opened.isna() | (opened >= cutoff)].copy()
+        dropped = before - len(df)
+        if dropped > 0:
+            logger.info("Filtered %d records opened before %s", dropped, settings.data_start_date)
+
     # Auto-detect cohort_start from L12M month tags if not set
     if settings.cohort_start is None and settings.last_12_months:
         first_tag = settings.last_12_months[0]

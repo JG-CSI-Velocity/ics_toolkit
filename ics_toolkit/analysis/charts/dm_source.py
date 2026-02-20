@@ -12,48 +12,37 @@ LAYOUT_DEFAULTS = dict(
 
 
 def chart_dm_by_branch(df, config: ChartConfig) -> go.Figure:
-    """ax46: Horizontal bar of DM count by Branch + debit % on secondary axis."""
+    """ax46: Horizontal bar of DM count by Branch with debit % as text."""
     data = df[df["Branch"] != "Total"].copy()
     colors = config.colors
 
     data = data.sort_values("Count", ascending=True)
 
-    fig = go.Figure()
+    # Build text labels: "123 (45.0% debit)"
+    text_labels = data.apply(
+        lambda r: (
+            f"{int(r['Count'])}  ({r['Debit %']:.1f}% debit)"
+            if "Debit %" in data.columns and pd.notna(r.get("Debit %"))
+            else str(int(r["Count"]))
+        ),
+        axis=1,
+    )
 
-    fig.add_trace(
+    fig = go.Figure(
         go.Bar(
             y=data["Branch"].astype(str),
             x=data["Count"],
             orientation="h",
-            name="Count",
             marker_color=colors[0],
-            yaxis="y",
+            text=text_labels,
+            textposition="outside",
         )
     )
-
-    if "Debit %" in data.columns:
-        fig.add_trace(
-            go.Scatter(
-                y=data["Branch"].astype(str),
-                x=pd.to_numeric(data["Debit %"], errors="coerce"),
-                name="Debit %",
-                mode="lines+markers",
-                marker=dict(color=colors[3], size=8),
-                line=dict(color=colors[3], width=2),
-                xaxis="x2",
-            )
-        )
 
     fig.update_layout(
         template=config.theme,
         yaxis_title="Branch",
-        xaxis=dict(title="Count", side="bottom"),
-        xaxis2=dict(
-            title="Debit %",
-            side="top",
-            overlaying="x",
-            range=[0, 105],
-        ),
+        xaxis_title="DM Account Count",
         **LAYOUT_DEFAULTS,
     )
     return fig

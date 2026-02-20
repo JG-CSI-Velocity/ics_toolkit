@@ -41,11 +41,23 @@ def chart_net_portfolio_growth(df, config: ChartConfig) -> go.Figure:
     fig = go.Figure()
 
     fig.add_trace(
+        go.Scatter(
+            x=df["Month"],
+            y=df["Cumulative"],
+            name="Cumulative Net",
+            mode="lines+markers",
+            marker=dict(color=colors[2], size=6),
+            line=dict(color=colors[2], width=2),
+        )
+    )
+
+    fig.add_trace(
         go.Bar(
             x=df["Month"],
             y=df["Opens"],
             name="Opens",
             marker_color=colors[0],
+            yaxis="y2",
         )
     )
 
@@ -56,25 +68,14 @@ def chart_net_portfolio_growth(df, config: ChartConfig) -> go.Figure:
             y=closes_neg,
             name="Closes",
             marker_color=colors[4] if len(colors) > 4 else colors[-1],
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df["Month"],
-            y=df["Cumulative"],
-            name="Cumulative",
-            mode="lines+markers",
-            marker=dict(color=colors[2], size=6),
-            line=dict(color=colors[2], width=2),
             yaxis="y2",
         )
     )
 
     # Align zero on both axes so the zero lines match visually
     y1_range, y2_range = _align_dual_axis_zero(
-        y1_values=list(df["Opens"]) + list(closes_neg),
-        y2_values=list(df["Cumulative"]),
+        y1_values=list(df["Cumulative"]),
+        y2_values=list(df["Opens"]) + list(closes_neg),
     )
 
     fig.update_layout(
@@ -82,9 +83,9 @@ def chart_net_portfolio_growth(df, config: ChartConfig) -> go.Figure:
         barmode="relative",
         xaxis_title="Month",
         xaxis=dict(tickangle=-45),
-        yaxis=dict(title="Opens / Closes", range=y1_range),
+        yaxis=dict(title="Cumulative Net", range=y1_range),
         yaxis2=dict(
-            title="Cumulative Net",
+            title="Opens / Closes",
             side="right",
             overlaying="y",
             range=y2_range,

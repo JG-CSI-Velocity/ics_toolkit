@@ -17,7 +17,6 @@ def analyze_activation_funnel(
     settings: Settings,
 ) -> AnalysisResult:
     """Activation funnel: Total -> ICS -> Stat O -> Debit -> Active L12M."""
-    total_accounts = len(df)
     ics_count = len(ics_all)
     stat_o_count = len(ics_stat_o)
     debit_count = len(ics_stat_o_debit)
@@ -26,7 +25,6 @@ def analyze_activation_funnel(
     active_count = int(data["Active in L12M"].sum()) if "Active in L12M" in data.columns else 0
 
     stages = [
-        ("Total Accounts", total_accounts),
         ("ICS Accounts", ics_count),
         ("Stat Code O", stat_o_count),
         ("With Debit Card", debit_count),
@@ -35,7 +33,7 @@ def analyze_activation_funnel(
 
     rows = []
     for i, (stage, count) in enumerate(stages):
-        pct_of_total = safe_percentage(count, total_accounts)
+        pct_of_ics = safe_percentage(count, ics_count)
         if i == 0:
             dropoff = 0.0
         else:
@@ -46,7 +44,7 @@ def analyze_activation_funnel(
             {
                 "Stage": stage,
                 "Count": count,
-                "% of Total": pct_of_total,
+                "% of ICS": pct_of_ics,
                 "Drop-off %": dropoff,
             }
         )

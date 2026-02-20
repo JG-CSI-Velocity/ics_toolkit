@@ -149,6 +149,9 @@ def create_charts(
         try:
             fig = builder(analysis.df, config)
             fig.update_layout(title_text=analysis.title)
+            # Hide legend for single-trace charts (Pie handles its own labels)
+            if len(fig.data) == 1 and not isinstance(fig.data[0], go.Pie):
+                fig.update_layout(showlegend=False)
             charts[analysis.name] = fig
         except Exception as e:
             logger.warning("Chart for '%s' failed: %s", analysis.name, e)

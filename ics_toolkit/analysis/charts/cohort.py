@@ -125,7 +125,7 @@ def chart_activation_summary(df, config: ChartConfig) -> go.Figure:
     for _, row in df.iterrows():
         metric = str(row["Metric"])
         value = row["Value"]
-        if "Activation Rate" in metric and value != "N/A":
+        if "Activation Rate" in metric and pd.notna(value):
             label = metric.replace(" Activation Rate", "")
             milestones.append(label)
             rates.append(float(value) / 100.0)
@@ -163,7 +163,7 @@ def chart_growth_patterns(df, config: ChartConfig) -> go.Figure:
         x_labels = []
         for m in milestones:
             col = f"{m} Swipes"
-            if col in df.columns and row[col] != "N/A":
+            if col in df.columns and pd.notna(row[col]):
                 vals.append(pd.to_numeric(row[col], errors="coerce"))
                 x_labels.append(m)
 

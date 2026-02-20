@@ -108,8 +108,8 @@ def analyze_cohort_activation(
                 row[f"{milestone} Active"] = active
                 row[f"{milestone} Activation %"] = safe_percentage(active, size)
             else:
-                row[f"{milestone} Active"] = "N/A"
-                row[f"{milestone} Activation %"] = "N/A"
+                row[f"{milestone} Active"] = None
+                row[f"{milestone} Activation %"] = None
 
         rows.append(row)
 

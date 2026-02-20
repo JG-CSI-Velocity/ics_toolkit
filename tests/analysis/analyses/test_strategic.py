@@ -21,15 +21,14 @@ class TestAnalyzeActivationFunnel:
         assert isinstance(result, AnalysisResult)
         assert result.name == "Activation Funnel"
 
-    def test_has_five_stages(
+    def test_has_four_stages(
         self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
     ):
         result = analyze_activation_funnel(
             sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
         )
-        assert len(result.df) == 5
+        assert len(result.df) == 4
         assert list(result.df["Stage"]) == [
-            "Total Accounts",
             "ICS Accounts",
             "Stat Code O",
             "With Debit Card",
@@ -40,16 +39,16 @@ class TestAnalyzeActivationFunnel:
         result = analyze_activation_funnel(
             sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
         )
-        assert list(result.df.columns) == ["Stage", "Count", "% of Total", "Drop-off %"]
+        assert list(result.df.columns) == ["Stage", "Count", "% of ICS", "Drop-off %"]
 
-    def test_first_stage_is_total(
+    def test_first_stage_is_ics(
         self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
     ):
         result = analyze_activation_funnel(
             sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
         )
-        assert result.df.iloc[0]["Count"] == len(sample_df)
-        assert result.df.iloc[0]["% of Total"] == 100.0
+        assert result.df.iloc[0]["Count"] == len(ics_all)
+        assert result.df.iloc[0]["% of ICS"] == 100.0
 
     def test_first_dropoff_is_zero(
         self, sample_df, ics_all, ics_stat_o, ics_stat_o_debit, sample_settings
