@@ -2,12 +2,10 @@
 
 import logging
 from datetime import datetime
-from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
 from openpyxl import Workbook
-from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import (
     Alignment,
     Border,
@@ -148,11 +146,7 @@ def _write_toc_sheet(wb: Workbook, analyses) -> None:
     ws.column_dimensions["C"].width = 25
 
 
-def _write_analysis_sheet(
-    wb: Workbook,
-    analysis,
-    chart_png: bytes | None = None,
-) -> None:
+def _write_analysis_sheet(wb: Workbook, analysis) -> None:
     """Write a single analysis as a formatted worksheet."""
     df = analysis.df
     if df.empty:
@@ -199,15 +193,8 @@ def _write_analysis_sheet(
             max_len = max(max_len, display_len)
         ws.column_dimensions[get_column_letter(col_idx)].width = min(max_len + 4, 30)
 
-    # Embed chart image if available
-    if chart_png:
-        img = XLImage(BytesIO(chart_png))
-        img.width = 700
-        img.height = 400
-        ws.add_image(img, f"A{len(df) + 4}")
-
     # Back to Contents link
-    link_row = len(df) + 3 if not chart_png else len(df) + 25
+    link_row = len(df) + 3
     ws.cell(row=link_row, column=1, value="Back to Contents")
     ws.cell(row=link_row, column=1).hyperlink = "#Contents!A1"
     ws.cell(row=link_row, column=1).font = Font(
@@ -222,16 +209,9 @@ def write_excel_report(
     settings,
     df: pd.DataFrame,
     analyses: list,
-    charts: dict | None = None,
-    chart_pngs: dict[str, bytes] | None = None,
     output_path: Path | None = None,
 ) -> Path:
     """Write the complete Excel report.
-
-    Args:
-        chart_pngs: Pre-rendered PNG bytes keyed by analysis name.
-            If provided, charts arg is ignored (avoids double-rendering).
-        charts: Plotly figure dict (legacy; rendered on the fly if chart_pngs not given).
 
     Returns the path to the generated file.
     """
@@ -246,29 +226,10 @@ def write_excel_report(
     _write_cover_sheet(wb, settings, df, analyses)
     _write_toc_sheet(wb, analyses)
 
-    # Use pre-rendered PNGs if available, otherwise render from figures
-    if chart_pngs is None:
-        chart_pngs = {}
-        if charts:
-            try:
-                from ics_toolkit.analysis.charts import render_chart_png
-
-                for name, fig in charts.items():
-                    try:
-                        chart_pngs[name] = render_chart_png(fig, settings.charts)
-                    except Exception as e:
-                        logger.warning("Chart PNG for '%s' failed: %s", name, e)
-            except ImportError:
-                logger.warning("kaleido not available; skipping chart images in Excel")
-
     for analysis in analyses:
         if analysis.error is not None:
             continue
-        _write_analysis_sheet(
-            wb,
-            analysis,
-            chart_png=chart_pngs.get(analysis.name),
-        )
+        _write_analysis_sheet(wb, analysis)
 
     wb.save(output_path)
     logger.info("Excel report saved: %s", output_path)

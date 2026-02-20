@@ -1,6 +1,7 @@
 """Chart creation registry and dispatcher."""
 
 import logging
+from pathlib import Path
 from typing import Callable
 
 import plotly.graph_objects as go
@@ -67,7 +68,6 @@ from ics_toolkit.analysis.charts.summary import (
     chart_total_ics,
 )
 from ics_toolkit.settings import AnalysisSettings as Settings
-from ics_toolkit.settings import ChartConfig
 
 logger = logging.getLogger(__name__)
 
@@ -155,42 +155,30 @@ def create_charts(
     return charts
 
 
-def render_chart_png(fig: go.Figure, config: ChartConfig) -> bytes:
-    """Render a Plotly figure to PNG bytes.
-
-    Requires kaleido: ``pip install kaleido``
-    """
-    return fig.to_image(
-        format="png",
-        width=config.width,
-        height=config.height,
-        scale=config.scale,
-    )
-
-
-def render_all_chart_pngs(
+def save_charts_html(
     charts: dict[str, go.Figure],
-    config: ChartConfig,
-) -> dict[str, bytes]:
-    """Render all charts to PNG bytes once, with progress logging.
+    output_dir: Path,
+) -> list[Path]:
+    """Save all charts as standalone interactive HTML files.
 
-    Returns an empty dict if kaleido is not installed.
+    Returns list of generated file paths.
     """
     if not charts:
-        return {}
+        return []
 
-    try:
-        import kaleido  # noqa: F401
-    except ImportError:
-        logger.warning("kaleido not installed; skipping chart PNG rendering")
-        return {}
-
-    pngs: dict[str, bytes] = {}
+    charts_dir = output_dir / "charts"
+    charts_dir.mkdir(parents=True, exist_ok=True)
+    paths: list[Path] = []
     total = len(charts)
+
     for i, (name, fig) in enumerate(charts.items(), start=1):
         try:
-            logger.info("  Rendering chart [%d/%d] %s", i, total, name)
-            pngs[name] = render_chart_png(fig, config)
+            safe_name = name.replace(" ", "_").replace("/", "_").replace("+", "")
+            path = charts_dir / f"{safe_name}.html"
+            fig.write_html(str(path), include_plotlyjs="cdn")
+            paths.append(path)
+            logger.info("  Chart [%d/%d] %s", i, total, name)
         except Exception as e:
-            logger.warning("  Chart PNG for '%s' failed: %s", name, e)
-    return pngs
+            logger.warning("  Chart HTML for '%s' failed: %s", name, e)
+
+    return paths

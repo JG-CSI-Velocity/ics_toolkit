@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 from ics_toolkit.analysis.analyses import run_all_analyses
 from ics_toolkit.analysis.analyses.base import AnalysisResult
-from ics_toolkit.analysis.charts import create_charts, render_all_chart_pngs
+from ics_toolkit.analysis.charts import create_charts, save_charts_html
 from ics_toolkit.analysis.data_loader import load_data
 from ics_toolkit.analysis.utils import get_ics_accounts, get_ics_stat_o, get_ics_stat_o_debit
 from ics_toolkit.settings import AnalysisSettings as Settings
@@ -118,7 +118,7 @@ def run_pipeline(
 
 def export_outputs(
     result: AnalysisPipelineResult,
-    skip_chart_pngs: bool = False,
+    skip_charts: bool = False,
 ) -> list[Path]:
     """Export pipeline results to configured output formats.
 
@@ -133,14 +133,11 @@ def export_outputs(
 
     logger.info("[5/5] Exporting reports...")
 
-    # Render chart PNGs once, reuse for both Excel and PPTX
-    chart_pngs: dict[str, bytes] = {}
-    if skip_chart_pngs:
-        logger.info("Skipping chart PNG rendering (--no-charts)")
-    elif result.charts:
-        logger.info("Rendering %d charts to PNG...", len(result.charts))
-        chart_pngs = render_all_chart_pngs(result.charts, settings.charts)
-        logger.info("Rendered %d chart PNGs", len(chart_pngs))
+    # Save charts as interactive HTML files
+    if not skip_charts and result.charts:
+        logger.info("Saving %d charts as HTML...", len(result.charts))
+        html_paths = save_charts_html(result.charts, settings.output_dir)
+        logger.info("Saved %d chart HTML files to charts/", len(html_paths))
 
     if settings.outputs.excel:
         try:
@@ -152,7 +149,6 @@ def export_outputs(
                 settings,
                 result.df,
                 result.analyses,
-                chart_pngs=chart_pngs,
                 output_path=path,
             )
             generated.append(path)
@@ -168,7 +164,6 @@ def export_outputs(
             write_pptx_report(
                 settings,
                 result.analyses,
-                chart_pngs=chart_pngs,
                 output_path=path,
             )
             generated.append(path)
