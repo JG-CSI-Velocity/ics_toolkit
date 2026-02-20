@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 
 from ics_toolkit.analysis.analyses import run_all_analyses
 from ics_toolkit.analysis.analyses.base import AnalysisResult
-from ics_toolkit.analysis.charts import create_charts, save_charts_html
+from ics_toolkit.analysis.charts import create_charts, render_all_chart_pngs, save_charts_html
 from ics_toolkit.analysis.data_loader import load_data
 from ics_toolkit.analysis.utils import get_ics_accounts, get_ics_stat_o, get_ics_stat_o_debit
 from ics_toolkit.settings import AnalysisSettings as Settings
@@ -27,6 +27,7 @@ class AnalysisPipelineResult:
     df: pd.DataFrame
     analyses: list[AnalysisResult] = field(default_factory=list)
     charts: dict[str, go.Figure] = field(default_factory=dict)
+    chart_pngs: dict[str, bytes] = field(default_factory=dict)
 
 
 def run_pipeline(
@@ -108,11 +109,24 @@ def run_pipeline(
         except Exception as e:
             logger.error("Chart generation failed: %s", e, exc_info=True)
 
+    # Step 4b: Render chart PNGs via matplotlib
+    chart_pngs: dict[str, bytes] = {}
+    if not skip_charts and charts:
+        logger.info("[4b/5] Rendering %d chart PNGs...", len(charts))
+        if on_progress:
+            on_progress(3, 5, "Rendering chart PNGs...")
+        try:
+            chart_pngs = render_all_chart_pngs(charts)
+            logger.info("Rendered %d chart PNGs", len(chart_pngs))
+        except Exception as e:
+            logger.error("Chart PNG rendering failed: %s", e, exc_info=True)
+
     return AnalysisPipelineResult(
         settings=settings,
         df=df,
         analyses=analyses,
         charts=charts,
+        chart_pngs=chart_pngs,
     )
 
 
@@ -150,6 +164,7 @@ def export_outputs(
                 result.df,
                 result.analyses,
                 output_path=path,
+                chart_pngs=result.chart_pngs,
             )
             generated.append(path)
         except Exception as e:
@@ -165,6 +180,7 @@ def export_outputs(
                 settings,
                 result.analyses,
                 output_path=path,
+                chart_pngs=result.chart_pngs,
             )
             generated.append(path)
         except Exception as e:

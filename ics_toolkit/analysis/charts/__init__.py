@@ -47,6 +47,7 @@ from ics_toolkit.analysis.charts.portfolio import (
     chart_engagement_decay,
     chart_net_portfolio_growth,
 )
+from ics_toolkit.analysis.charts.renderer import render_all_chart_pngs as render_all_chart_pngs
 from ics_toolkit.analysis.charts.source import (
     chart_account_type,
     chart_source_by_branch,

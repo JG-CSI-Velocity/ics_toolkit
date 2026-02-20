@@ -2,10 +2,12 @@
 
 import logging
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
 from openpyxl import Workbook
+from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import (
     Alignment,
     Border,
@@ -146,7 +148,11 @@ def _write_toc_sheet(wb: Workbook, analyses) -> None:
     ws.column_dimensions["C"].width = 25
 
 
-def _write_analysis_sheet(wb: Workbook, analysis) -> None:
+def _write_analysis_sheet(
+    wb: Workbook,
+    analysis,
+    chart_png: bytes | None = None,
+) -> None:
     """Write a single analysis as a formatted worksheet."""
     df = analysis.df
     if df.empty:
@@ -193,8 +199,18 @@ def _write_analysis_sheet(wb: Workbook, analysis) -> None:
             max_len = max(max_len, display_len)
         ws.column_dimensions[get_column_letter(col_idx)].width = min(max_len + 4, 30)
 
+    # Chart image (if available)
+    if chart_png:
+        img_row = len(df) + 3
+        img = XLImage(BytesIO(chart_png))
+        img.width = 800
+        img.height = 480
+        ws.add_image(img, f"A{img_row}")
+        link_row = img_row + 26  # ~26 rows for the image height
+    else:
+        link_row = len(df) + 3
+
     # Back to Contents link
-    link_row = len(df) + 3
     ws.cell(row=link_row, column=1, value="Back to Contents")
     ws.cell(row=link_row, column=1).hyperlink = "#Contents!A1"
     ws.cell(row=link_row, column=1).font = Font(
@@ -210,6 +226,7 @@ def write_excel_report(
     df: pd.DataFrame,
     analyses: list,
     output_path: Path | None = None,
+    chart_pngs: dict[str, bytes] | None = None,
 ) -> Path:
     """Write the complete Excel report.
 
@@ -226,10 +243,11 @@ def write_excel_report(
     _write_cover_sheet(wb, settings, df, analyses)
     _write_toc_sheet(wb, analyses)
 
+    pngs = chart_pngs or {}
     for analysis in analyses:
         if analysis.error is not None:
             continue
-        _write_analysis_sheet(wb, analysis)
+        _write_analysis_sheet(wb, analysis, chart_png=pngs.get(analysis.name))
 
     wb.save(output_path)
     logger.info("Excel report saved: %s", output_path)

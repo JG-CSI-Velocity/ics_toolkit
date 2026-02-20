@@ -1,6 +1,7 @@
 """High-level PPTX report orchestrator using DeckBuilder."""
 
 import logging
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -93,6 +94,7 @@ def write_pptx_report(
     settings: Settings,
     analyses: list[AnalysisResult],
     output_path: Path | None = None,
+    chart_pngs: dict[str, bytes] | None = None,
 ) -> Path:
     """Build and save a PPTX presentation.
 
@@ -106,16 +108,18 @@ def write_pptx_report(
 
     lookup = _build_analysis_lookup(analyses)
 
+    pngs = chart_pngs or {}
+
     try:
         from ics_toolkit.analysis.exports.deck_builder import (  # noqa: F401
             DeckBuilder,
             SlideContent,
         )
 
-        _build_with_deck_builder(settings, lookup, output_path)
+        _build_with_deck_builder(settings, lookup, output_path, pngs)
     except ImportError:
         logger.warning("DeckBuilder not available; building simple PPTX")
-        _build_simple_pptx(settings, lookup, output_path)
+        _build_simple_pptx(settings, lookup, output_path, pngs)
 
     logger.info("PPTX report saved: %s", output_path)
     return output_path
@@ -125,6 +129,7 @@ def _build_with_deck_builder(
     settings: Settings,
     lookup: dict[str, AnalysisResult],
     output_path: Path,
+    chart_pngs: dict[str, bytes] | None = None,
 ) -> None:
     """Build PPTX using the full DeckBuilder with CSI templates."""
     from ics_toolkit.analysis.exports.deck_builder import DeckBuilder, SlideContent
@@ -134,7 +139,9 @@ def _build_with_deck_builder(
         generate_declarative_title,
     )
 
+    pngs = chart_pngs or {}
     slides: list[SlideContent] = []
+    png_temp_dir = tempfile.mkdtemp(prefix="ics_charts_")
 
     # Title slide
     slides.append(
@@ -173,13 +180,28 @@ def _build_with_deck_builder(
                 continue
 
             title = generate_declarative_title(analysis)
-            slides.append(
-                SlideContent(
-                    slide_type="section",
-                    title=title,
-                    layout_index=2,
+
+            # If we have a chart PNG for this analysis, add a screenshot slide
+            if name in pngs:
+                safe = name.replace(" ", "_").replace("/", "_").replace("+", "")
+                png_path = Path(png_temp_dir) / f"{safe}.png"
+                png_path.write_bytes(pngs[name])
+                slides.append(
+                    SlideContent(
+                        slide_type="screenshot",
+                        title=title,
+                        images=[str(png_path)],
+                        layout_index=5,
+                    )
                 )
-            )
+            else:
+                slides.append(
+                    SlideContent(
+                        slide_type="section",
+                        title=title,
+                        layout_index=2,
+                    )
+                )
 
     builder = DeckBuilder(template_path=settings.pptx_template)
     builder.build(slides, output_path)
@@ -189,11 +211,15 @@ def _build_simple_pptx(
     settings: Settings,
     lookup: dict[str, AnalysisResult],
     output_path: Path,
+    chart_pngs: dict[str, bytes] | None = None,
 ) -> None:
     """Fallback: build a basic PPTX without DeckBuilder."""
+    from io import BytesIO
+
     from pptx import Presentation
     from pptx.util import Inches, Pt
 
+    pngs = chart_pngs or {}
     prs = Presentation()
     prs.slide_width = Inches(13.33)
     prs.slide_height = Inches(7.5)
@@ -204,7 +230,7 @@ def _build_simple_pptx(
     slide.shapes.title.text = "ICS Accounts Analysis"
     slide.placeholders[1].text = settings.client_name or f"Client {settings.client_id}"
 
-    # Section + analysis title slides
+    # Section + analysis slides
     blank_layout = prs.slide_layouts[6]
     for section_name, analysis_names in SECTION_MAP.items():
         for name in analysis_names:
@@ -212,14 +238,23 @@ def _build_simple_pptx(
                 continue
 
             slide = prs.slides.add_slide(blank_layout)
-            txBox = slide.shapes.add_textbox(
+            tx_box = slide.shapes.add_textbox(
                 Inches(0.5),
                 Inches(0.3),
                 Inches(12),
                 Inches(0.6),
             )
-            txBox.text_frame.paragraphs[0].text = lookup[name].title
-            txBox.text_frame.paragraphs[0].font.size = Pt(18)
-            txBox.text_frame.paragraphs[0].font.bold = True
+            tx_box.text_frame.paragraphs[0].text = lookup[name].title
+            tx_box.text_frame.paragraphs[0].font.size = Pt(18)
+            tx_box.text_frame.paragraphs[0].font.bold = True
+
+            # Embed chart image if available
+            if name in pngs:
+                slide.shapes.add_picture(
+                    BytesIO(pngs[name]),
+                    Inches(0.5),
+                    Inches(1.2),
+                    width=Inches(10),
+                )
 
     prs.save(str(output_path))
